@@ -50,21 +50,21 @@ pipx install -e .
 ### Verify Installation
 
 ```bash
-tidy --version
-# Output: tidy, version 0.1.0
+tidyup --version
+# Output: tidyup, version 0.1.0
 ```
 
 ## Quick Start
 
 ```bash
 # Preview what would happen (recommended first run)
-tidy ~/Downloads --dry-run
+tidyup ~/Downloads --dry-run
 
 # Actually organize files
-tidy ~/Downloads
+tidyup ~/Downloads
 
 # Organize to a specific destination
-tidy ~/Downloads ~/Documents/Organized
+tidyup ~/Downloads ~/Documents/Organized
 ```
 
 ## CLI Reference
@@ -72,7 +72,7 @@ tidy ~/Downloads ~/Documents/Organized
 ### Main Command
 
 ```
-tidy [OPTIONS] SOURCE [DESTINATION]
+tidyup [OPTIONS] SOURCE [DESTINATION]
 ```
 
 | Argument | Description |
@@ -98,8 +98,8 @@ tidy [OPTIONS] SOURCE [DESTINATION]
 
 | Command | Description |
 |---------|-------------|
-| `tidy status` | Show organization statistics from logs |
-| `tidy reindex` | Renumber destination folders (coming soon) |
+| `tidyup status` | Show organization statistics from logs |
+| `tidyup reindex` | Renumber destination folders (coming soon) |
 
 ## Usage Examples
 
@@ -108,12 +108,12 @@ tidy [OPTIONS] SOURCE [DESTINATION]
 Always recommended before your first run:
 
 ```bash
-tidy ~/Downloads --dry-run
+tidyup ~/Downloads --dry-run
 ```
 
 Output:
 ```
-Tidy v0.1.0
+TidyUp v0.1.0
 Source: /Users/you/Downloads
 Destination: /Users/you/Documents/Organized
 Mode: Move + Rename
@@ -139,7 +139,7 @@ Summary
 Organize files into categories without renaming them:
 
 ```bash
-tidy ~/Downloads --move
+tidyup ~/Downloads --move
 ```
 
 ### Rename Only (In Place)
@@ -147,7 +147,7 @@ tidy ~/Downloads --move
 Clean up ugly filenames without moving files:
 
 ```bash
-tidy ~/Downloads --rename
+tidyup ~/Downloads --rename
 ```
 
 Example transformations:
@@ -159,7 +159,7 @@ Example transformations:
 Leave files in source if categorization confidence is below 70%:
 
 ```bash
-tidy ~/Downloads --skip
+tidyup ~/Downloads --skip
 ```
 
 ### Process Limited Files
@@ -167,7 +167,7 @@ tidy ~/Downloads --skip
 Test with a small batch first:
 
 ```bash
-tidy ~/Downloads --limit 10 --dry-run
+tidyup ~/Downloads --limit 10 --dry-run
 ```
 
 ### Verbose Output
@@ -175,7 +175,7 @@ tidy ~/Downloads --limit 10 --dry-run
 See detailed information about each file:
 
 ```bash
-tidy ~/Downloads --verbose
+tidyup ~/Downloads --verbose
 ```
 
 ### Custom Destination
@@ -183,7 +183,7 @@ tidy ~/Downloads --verbose
 Organize to a specific location:
 
 ```bash
-tidy ~/Downloads /Volumes/External/Organized
+tidyup ~/Downloads /Volumes/External/Organized
 ```
 
 ## Folder Structure
@@ -289,7 +289,7 @@ ls -la ~/Documents/Organized
 Unknown file extensions are placed in `99_Unsorted/`. Check the file extension:
 
 ```bash
-tidy ~/Downloads --dry-run --verbose
+tidyup ~/Downloads --dry-run --verbose
 ```
 
 #### Duplicate files
@@ -308,11 +308,11 @@ Tidy automatically skips:
 
 ```bash
 # Show all options
-tidy --help
+tidyup --help
 
 # Show subcommand help
-tidy run --help
-tidy status --help
+tidyup run --help
+tidyup status --help
 ```
 
 ### Viewing Logs

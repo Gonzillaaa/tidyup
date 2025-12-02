@@ -24,17 +24,17 @@ class TidyGroup(click.Group):
 @click.version_option(version=__version__)
 @click.pass_context
 def main(ctx: click.Context) -> None:
-    """Tidy - Organize, rename, and categorize files.
+    """TidyUp - Organize, rename, and categorize files.
 
     \b
     Examples:
-        tidy ~/Downloads                  # Move + rename (default)
-        tidy ~/Downloads ~/Organized      # Explicit destination
-        tidy ~/Downloads --move           # Only move, keep names
-        tidy ~/Downloads --rename         # Only rename in place
-        tidy . --dry-run                  # Preview changes
-        tidy status                       # Show statistics
-        tidy reindex                      # Renumber folders
+        tidyup ~/Downloads                  # Move + rename (default)
+        tidyup ~/Downloads ~/Organized      # Explicit destination
+        tidyup ~/Downloads --move           # Only move, keep names
+        tidyup ~/Downloads --rename         # Only rename in place
+        tidyup . --dry-run                  # Preview changes
+        tidyup status                       # Show statistics
+        tidyup reindex                      # Renumber folders
     """
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -101,7 +101,7 @@ def run_organize(source: Path, destination: Optional[Path], options: dict) -> No
     if destination is None and do_move:
         destination = Path.home() / "Documents" / "Organized"
 
-    console.print(f"[bold]Tidy[/bold] v{__version__}")
+    console.print(f"[bold]TidyUp[/bold] v{__version__}")
     console.print(f"Source: {source.resolve()}")
 
     if do_move:

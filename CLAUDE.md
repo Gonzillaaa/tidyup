@@ -115,7 +115,7 @@ Dev:
 pip install -e ".[dev]"
 
 # Run CLI
-tidy ~/Downloads --dry-run
+tidyup ~/Downloads --dry-run
 
 # Run tests
 pytest

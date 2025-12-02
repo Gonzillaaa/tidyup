@@ -16,7 +16,7 @@ class TestCLIHelp:
         result = cli_runner.invoke(main, ["--help"])
 
         assert result.exit_code == 0
-        assert "Tidy - Organize, rename, and categorize files" in result.output
+        assert "TidyUp - Organize, rename, and categorize files" in result.output
         assert "status" in result.output
         assert "reindex" in result.output
         assert "run" in result.output
@@ -46,7 +46,7 @@ class TestCLIHelp:
         result = cli_runner.invoke(main, [])
 
         assert result.exit_code == 0
-        assert "Tidy - Organize, rename, and categorize files" in result.output
+        assert "TidyUp - Organize, rename, and categorize files" in result.output
 
 
 class TestCLISourceValidation:
@@ -63,7 +63,7 @@ class TestCLISourceValidation:
         result = cli_runner.invoke(main, [str(temp_source), "--dry-run"])
 
         assert result.exit_code == 0
-        assert "Tidy" in result.output
+        assert "TidyUp" in result.output
 
 
 class TestSubcommands:
@@ -127,11 +127,11 @@ class TestCLIFlags:
         result = cli_runner.invoke(main, [str(temp_source), "--dry-run"])
 
         assert result.exit_code == 0
-        assert "Tidy" in result.output
+        assert "TidyUp" in result.output
 
     def test_explicit_run_command_works(self, cli_runner: CliRunner, temp_source: Path) -> None:
         """Using explicit 'run' command should work."""
         result = cli_runner.invoke(main, ["run", str(temp_source), "--dry-run"])
 
         assert result.exit_code == 0
-        assert "Tidy" in result.output
+        assert "TidyUp" in result.output

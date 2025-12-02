@@ -44,7 +44,7 @@ dev = [
 ]
 
 [project.scripts]
-tidy = "tidy.cli:main"
+tidyup = "tidy.cli:main"
 
 [project.urls]
 Repository = "https://github.com/gonzalo/tidy"
