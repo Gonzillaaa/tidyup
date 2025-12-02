@@ -3,7 +3,7 @@
 import pytest
 from pathlib import Path
 
-from tidy.operations import (
+from tidyup.operations import (
     safe_move,
     safe_rename,
     ensure_dest_structure,

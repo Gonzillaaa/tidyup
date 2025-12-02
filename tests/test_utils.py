@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from datetime import datetime
 
-from tidy.utils import (
+from tidyup.utils import (
     sanitize_filename,
     format_size,
     compute_file_hash,

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tidy-organizer"
+name = "tidyup"
 version = "0.1.0"
 description = "A CLI tool to organize, rename, and categorize files"
 readme = "README.md"
@@ -44,13 +44,13 @@ dev = [
 ]
 
 [project.scripts]
-tidyup = "tidy.cli:main"
+tidyup = "tidyup.cli:main"
 
 [project.urls]
 Repository = "https://github.com/gonzalo/tidy"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tidy"]
+packages = ["src/tidyup"]
 
 [tool.ruff]
 line-length = 100

@@ -4,8 +4,8 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from tidy.engine import Engine, EXTENSION_CATEGORIES
-from tidy.models import FileInfo
+from tidyup.engine import Engine, EXTENSION_CATEGORIES
+from tidyup.models import FileInfo
 
 
 class TestEngineInit:
@@ -136,7 +136,7 @@ class TestProcessFile:
         engine = Engine(source, destination=dest, options={"dry_run": True})
         file = FileInfo.from_path(file_path)
 
-        from tidy.logger import ActionLogger
+        from tidyup.logger import ActionLogger
         logger = ActionLogger(source, dest, {})
 
         action = engine.process_file(file, logger)
@@ -156,7 +156,7 @@ class TestProcessFile:
         engine = Engine(source, options={"skip": True, "dry_run": True})
         file = FileInfo.from_path(file_path)
 
-        from tidy.logger import ActionLogger
+        from tidyup.logger import ActionLogger
         logger = ActionLogger(source, source, {})
 
         action = engine.process_file(file, logger)
@@ -176,7 +176,7 @@ class TestProcessFile:
         engine = Engine(source, destination=dest, options={"dry_run": True})
         file = FileInfo.from_path(file_path)
 
-        from tidy.logger import ActionLogger
+        from tidyup.logger import ActionLogger
         logger = ActionLogger(source, dest, {})
 
         action = engine.process_file(file, logger)
@@ -217,7 +217,7 @@ class TestEngineRun:
 
         (source / "document.pdf").write_text("content")
 
-        with patch("tidy.engine.ActionLogger.save"):  # Don't save to ~/.tidy
+        with patch("tidyup.engine.ActionLogger.save"):  # Don't save to ~/.tidy
             engine = Engine(source, destination=dest)
             result = engine.run()
 
@@ -248,7 +248,7 @@ class TestEngineRun:
         # Create file with ugly name
         (source / "1234567890123.pdf").write_text("content")
 
-        with patch("tidy.engine.ActionLogger.save"):
+        with patch("tidyup.engine.ActionLogger.save"):
             engine = Engine(source, destination=dest, options={"move": True})
             result = engine.run()
 
@@ -264,7 +264,7 @@ class TestEngineRun:
         # Create file with ugly name
         (source / "1234567890123.pdf").write_text("content")
 
-        with patch("tidy.engine.ActionLogger.save"):
+        with patch("tidyup.engine.ActionLogger.save"):
             engine = Engine(source, options={"rename": True})
             result = engine.run()
 
@@ -281,7 +281,7 @@ class TestEngineRun:
 
         (source / "test.pdf").write_text("content")
 
-        with patch("tidy.engine.ActionLogger.save"):
+        with patch("tidyup.engine.ActionLogger.save"):
             engine = Engine(source, destination=dest)
             engine.run()
 
@@ -294,7 +294,7 @@ class TestExtensionCategories:
 
     def test_all_categories_exist(self) -> None:
         """All mapped categories exist in folder structure."""
-        from tidy.operations import DEFAULT_FOLDERS
+        from tidyup.operations import DEFAULT_FOLDERS
 
         folder_names = {f["name"] for f in DEFAULT_FOLDERS}
         folder_numbers = {f["number"] for f in DEFAULT_FOLDERS}

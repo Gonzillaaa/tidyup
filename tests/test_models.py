@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime, date
 from pathlib import Path
 
-from tidy.models import (
+from tidyup.models import (
     FileInfo,
     DetectionResult,
     RenameResult,

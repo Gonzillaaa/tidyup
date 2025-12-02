@@ -357,8 +357,8 @@ pytest tests/test_engine.py -v
 ### Project Structure
 
 ```
-tidy/
-├── src/tidy/
+tidyup/
+├── src/tidyup/
 │   ├── __init__.py      # Package metadata
 │   ├── cli.py           # Click CLI interface
 │   ├── engine.py        # Core orchestration logic

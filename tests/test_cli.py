@@ -4,8 +4,8 @@ import pytest
 from click.testing import CliRunner
 from pathlib import Path
 
-from tidy.cli import main
-from tidy import __version__
+from tidyup.cli import main
+from tidyup import __version__
 
 
 class TestCLIHelp:

@@ -26,7 +26,7 @@ Tidy is a CLI tool for organizing, renaming, and categorizing files. It uses a p
 
 ### File Organization
 ```
-src/tidy/
+src/tidyup/
 ├── cli.py          # Entry point, Click commands
 ├── engine.py       # Main orchestration
 ├── config.py       # Configuration loading

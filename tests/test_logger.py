@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
-from tidy.logger import (
+from tidyup.logger import (
     ensure_log_dir,
     get_tidy_dir,
     ActionLogger,
@@ -14,7 +14,7 @@ from tidy.logger import (
     list_logs,
     aggregate_logs,
 )
-from tidy.models import Action, FileInfo, DetectionResult, RenameResult
+from tidyup.models import Action, FileInfo, DetectionResult, RenameResult
 
 
 class TestEnsureLogDir:
@@ -22,7 +22,7 @@ class TestEnsureLogDir:
 
     def test_creates_log_directory(self, tmp_path: Path) -> None:
         """Creates log directory if it doesn't exist."""
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = ensure_log_dir()
 
             assert result == tmp_path / "logs"
@@ -33,7 +33,7 @@ class TestEnsureLogDir:
         log_dir = tmp_path / "logs"
         log_dir.mkdir(parents=True)
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = ensure_log_dir()
 
             assert result == log_dir
@@ -144,7 +144,7 @@ class TestActionLogger:
 
     def test_save_creates_json_file(self, tmp_path: Path) -> None:
         """save creates JSON file with correct format."""
-        with patch("tidy.logger.ensure_log_dir", return_value=tmp_path):
+        with patch("tidyup.logger.ensure_log_dir", return_value=tmp_path):
             logger = ActionLogger(
                 tmp_path / "source",
                 tmp_path / "dest",
@@ -217,7 +217,7 @@ class TestListLogs:
 
     def test_returns_empty_for_no_dir(self, tmp_path: Path) -> None:
         """Returns empty list if log dir doesn't exist."""
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path / "nonexistent"):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path / "nonexistent"):
             result = list_logs()
 
             assert result == []
@@ -231,7 +231,7 @@ class TestListLogs:
         (log_dir / "2024-01-15_120000.json").write_text("{}")
         (log_dir / "2024-01-12_120000.json").write_text("{}")
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = list_logs()
 
             assert len(result) == 3
@@ -247,7 +247,7 @@ class TestListLogs:
         for i in range(5):
             (log_dir / f"2024-01-{10+i:02d}_120000.json").write_text("{}")
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = list_logs(limit=2)
 
             assert len(result) == 2
@@ -261,7 +261,7 @@ class TestListLogs:
         (log_dir / "readme.txt").write_text("text")
         (log_dir / "backup.bak").write_text("backup")
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = list_logs()
 
             assert len(result) == 1
@@ -272,7 +272,7 @@ class TestAggregateLogs:
 
     def test_returns_zeros_for_no_logs(self, tmp_path: Path) -> None:
         """Returns zero stats when no logs exist."""
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path / "nonexistent"):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path / "nonexistent"):
             result = aggregate_logs()
 
             assert result["total_runs"] == 0
@@ -296,7 +296,7 @@ class TestAggregateLogs:
         with open(log_dir / f"{today}_120000.json", "w") as f:
             json.dump(recent_log, f)
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = aggregate_logs(days=7)
 
             assert result["total_runs"] == 1
@@ -322,7 +322,7 @@ class TestAggregateLogs:
         with open(log_dir / f"{old_date}_120000.json", "w") as f:
             json.dump(old_log, f)
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             result = aggregate_logs(days=7)
 
             assert result["total_runs"] == 0
@@ -336,7 +336,7 @@ class TestAggregateLogs:
         today = datetime.now().strftime("%Y-%m-%d")
         (log_dir / f"{today}_120000.json").write_text("invalid json {{{")
 
-        with patch("tidy.logger.get_tidy_dir", return_value=tmp_path):
+        with patch("tidyup.logger.get_tidy_dir", return_value=tmp_path):
             # Should not raise, just skip the invalid log
             result = aggregate_logs(days=7)
 

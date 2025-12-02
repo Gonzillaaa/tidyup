@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from tidy.discovery import (
+from tidyup.discovery import (
     discover_files,
     should_skip_pattern,
     should_skip_recent,
