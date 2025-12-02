@@ -1,0 +1,128 @@
+# Claude Code Directives for Tidy
+
+## Project Overview
+
+Tidy is a CLI tool for organizing, renaming, and categorizing files. It uses a plugin architecture for file detection and renaming.
+
+## Key Documentation
+
+- **Requirements**: `docs/REQUIREMENTS.md` - Full specification
+- **Backlog**: `docs/BACKLOG.md` - Implementation tasks with story points
+
+## Code Standards
+
+### Python Style
+- Python 3.10+ with type hints on all public functions
+- Use `pathlib.Path` for all file operations (not `os.path`)
+- Use dataclasses for data structures
+- Follow PEP 8, enforced by `ruff`
+- Maximum line length: 100 characters
+
+### Naming Conventions
+- Classes: `PascalCase` (e.g., `FileInfo`, `InvoiceDetector`)
+- Functions/methods: `snake_case` (e.g., `detect_category`, `extract_title`)
+- Constants: `UPPER_SNAKE_CASE` (e.g., `CONFIDENCE_HIGH`)
+- Private methods: prefix with `_` (e.g., `_parse_metadata`)
+
+### File Organization
+```
+src/tidy/
+├── cli.py          # Entry point, Click commands
+├── engine.py       # Main orchestration
+├── config.py       # Configuration loading
+├── models.py       # Dataclasses (FileInfo, Action, etc.)
+├── utils.py        # Utility functions
+├── operations.py   # File move/rename operations
+├── discovery.py    # File discovery and filtering
+├── logger.py       # Action logging
+├── content.py      # PDF/archive content extraction
+├── output.py       # Rich output formatting
+├── interactive.py  # Interactive prompts
+├── detectors/      # File type detectors (plugin architecture)
+└── renamers/       # File renamers (plugin architecture)
+```
+
+### Testing
+- Every new module must have corresponding tests in `tests/`
+- Use pytest fixtures for common test data
+- Use `tmp_path` fixture for file operations (no real filesystem pollution)
+- Mock external dependencies (file system in unit tests)
+- Target 80% code coverage
+
+### Error Handling
+- Never delete files (core safety principle)
+- Handle file permission errors gracefully
+- Log all errors to the action log
+- Continue processing other files if one fails
+
+## Development Workflow
+
+### Before Implementing a Task
+1. Read the task description in `docs/BACKLOG.md`
+2. Check dependencies are complete
+3. Review related code in requirements
+
+### After Implementing
+1. Run tests: `pytest tests/`
+2. Run linter: `ruff check src/`
+3. **Commit immediately** - Make a git commit as soon as a feature is implemented and tests pass
+4. Update task status in `docs/BACKLOG.md`
+
+### Git Workflow
+- **Commit frequently**: Make small, atomic commits after each logical unit of work
+- **Don't batch commits**: Commit as soon as tests pass, not at the end of a session
+- **Each commit should**: Pass all tests, be self-contained, have a clear purpose
+
+### Commit Messages
+- Use conventional commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`
+- Reference task ID when applicable: `feat: implement FileInfo dataclass (2.1.1)`
+
+## Common Patterns
+
+### Adding a New Detector
+1. Create `src/tidy/detectors/{name}.py`
+2. Inherit from `BaseDetector`
+3. Implement `detect(file: FileInfo) -> DetectionResult | None`
+4. Register in `detectors/__init__.py`
+5. Add tests in `tests/test_detectors.py`
+
+### Adding a New Renamer
+1. Create `src/tidy/renamers/{name}.py`
+2. Inherit from `BaseRenamer`
+3. Implement `rename(file: FileInfo, detection: DetectionResult) -> RenameResult`
+4. Register in `renamers/__init__.py`
+5. Add tests in `tests/test_renamers.py`
+
+## Dependencies
+
+Core:
+- `click` - CLI framework
+- `rich` - Terminal output
+- `pyyaml` - Config parsing
+- `pypdf` - PDF metadata
+- `pillow` - Image EXIF
+
+Dev:
+- `pytest` - Testing
+- `pytest-cov` - Coverage
+- `ruff` - Linting
+- `mypy` - Type checking
+
+## Quick Reference
+
+```bash
+# Install for development
+pip install -e ".[dev]"
+
+# Run CLI
+tidy ~/Downloads --dry-run
+
+# Run tests
+pytest
+
+# Run linter
+ruff check src/
+
+# Run type checker
+mypy src/
+```
