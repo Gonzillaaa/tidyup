@@ -92,10 +92,12 @@ def _register_default_detectors(registry: DetectorRegistry) -> None:
     from .generic import GenericDetector
     from .screenshot import ScreenshotDetector
     from .arxiv import ArxivDetector
+    from .invoice import InvoiceDetector
 
     # Register in priority order (more specific first)
     registry.register(ScreenshotDetector())  # priority=10
     registry.register(ArxivDetector())  # priority=10
+    registry.register(InvoiceDetector())  # priority=15
     registry.register(GenericDetector())  # priority=50
 
 
