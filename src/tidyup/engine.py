@@ -62,10 +62,17 @@ class Engine:
         self.move_only = self.options.get("move", False)
         self.rename_only = self.options.get("rename", False)
         self.skip_uncertain = self.options.get("skip", False)
+        self.interactive = self.options.get("interactive", False)
         self.verbose = self.options.get("verbose", False)
         self.limit = self.options.get("limit")
 
         self.confidence_threshold = 0.7
+
+        # Initialize interactive handler if needed
+        self._interactive_handler = None
+        if self.interactive:
+            from .interactive import InteractiveHandler
+            self._interactive_handler = InteractiveHandler()
 
         # Determine destination
         if self.destination is None and not self.rename_only:
@@ -148,6 +155,43 @@ class Engine:
                 )
                 logger.log_action(action)
                 return action
+
+            if self.interactive and self._interactive_handler:
+                # Interactive mode: prompt user for action
+                if self._interactive_handler.should_prompt(file, detection):
+                    user_action, new_category = self._interactive_handler.prompt_for_file(
+                        file, detection
+                    )
+
+                    if user_action == "skip" or user_action == "skip_type":
+                        action = Action(
+                            file=file,
+                            detection=detection,
+                            source_path=file.path,
+                            dest_path=file.path,
+                            status="skipped",
+                        )
+                        logger.log_action(action)
+                        return action
+
+                    if user_action == "change" and new_category:
+                        # Update detection with user's choice
+                        detection = DetectionResult(
+                            category=new_category,
+                            confidence=1.0,  # User explicitly chose
+                            detector_name="UserChoice",
+                        )
+                else:
+                    # User chose to skip this type earlier
+                    action = Action(
+                        file=file,
+                        detection=detection,
+                        source_path=file.path,
+                        dest_path=file.path,
+                        status="skipped",
+                    )
+                    logger.log_action(action)
+                    return action
 
         # Step 3: Determine rename (unless move-only mode)
         rename_result = None
