@@ -23,12 +23,32 @@
 
 ## Installation
 
-```bash
-# Using pipx (recommended - installs globally in isolation)
-pipx install -e /path/to/tidyup
+### Prerequisites
 
-# Or using pip
-pip install -e /path/to/tidyup
+Install [pipx](https://pipx.pypa.io/) (recommended for CLI tools):
+
+```bash
+# macOS
+brew install pipx
+pipx ensurepath
+
+# Linux/WSL
+python3 -m pip install --user pipx
+pipx ensurepath
+```
+
+### Install TidyUp
+
+```bash
+# Clone the repository
+git clone https://github.com/Gonzillaaa/tidyup.git
+cd tidyup
+
+# Install with pipx (recommended - isolated global install)
+pipx install -e .
+
+# Or with pip
+pip install -e .
 ```
 
 ## Quick Start
