@@ -103,7 +103,7 @@ class TestArchiveBookDetector:
         """Detects RAR with book keywords in filename."""
         detector = ArchiveBookDetector()
 
-        # Can't inspect RAR content, but filename suggests book
+        # Can't inspect RAR content, but filename has "Edition" (strong indicator)
         file_path = tmp_path / "Python Programming Guide 3rd Edition.rar"
         file_path.write_bytes(b"rar content")
         file = FileInfo.from_path(file_path)
@@ -112,7 +112,7 @@ class TestArchiveBookDetector:
 
         assert result is not None
         assert result.category == "Books"
-        assert result.confidence == CONFIDENCE_MEDIUM
+        assert result.confidence == CONFIDENCE_HIGH  # "Edition" is strong indicator
 
     def test_detects_7z_with_book_keywords(self, tmp_path: Path) -> None:
         """Detects 7z with book keywords in filename."""
@@ -201,3 +201,32 @@ class TestArchiveBookDetector:
         result = detector.detect(file)
 
         assert result is not None
+
+    def test_detects_study_guide_rar(self, tmp_path: Path) -> None:
+        """Detects RAR with 'Study Guide' in filename."""
+        detector = ArchiveBookDetector()
+
+        file_path = tmp_path / "Tableau Certified Data Analyst Study Guide.rar"
+        file_path.write_bytes(b"rar content")
+        file = FileInfo.from_path(file_path)
+
+        result = detector.detect(file)
+
+        assert result is not None
+        assert result.category == "Books"
+        # "study", "guide", "certified", "analyst" = 4 moderate keywords
+        assert result.confidence == CONFIDENCE_MEDIUM
+
+    def test_detects_introducing_edition_rar(self, tmp_path: Path) -> None:
+        """Detects RAR with 'Introducing' and 'Edition' in filename."""
+        detector = ArchiveBookDetector()
+
+        file_path = tmp_path / "Introducing Python 3rd Edition.rar"
+        file_path.write_bytes(b"rar content")
+        file = FileInfo.from_path(file_path)
+
+        result = detector.detect(file)
+
+        assert result is not None
+        assert result.category == "Books"
+        assert result.confidence == CONFIDENCE_HIGH  # "Edition" is strong

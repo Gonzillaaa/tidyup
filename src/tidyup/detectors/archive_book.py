@@ -18,32 +18,45 @@ ZIP_COMPATIBLE = {"zip", "cbz", "cbr", "epub"}  # EPUB is actually a ZIP
 # Archive extensions we can only check by filename
 OPAQUE_ARCHIVES = {"rar", "7z", "tar", "gz", "bz2"}
 
-# Book-related keywords in filenames
-BOOK_KEYWORDS = [
-    r"\bedition\b",
+# Book-related keywords in filenames (strong indicators)
+STRONG_BOOK_KEYWORDS = [
+    r"\bedition\b",           # "3rd Edition"
     r"\bhandbook\b",
+    r"\btextbook\b",
+    r"\bfor\s+dummies\b",
+    r"\bcookbook\b",
+    r"\bdefinitive\b",
+]
+
+# Moderate indicators (need 2+ to classify)
+MODERATE_BOOK_KEYWORDS = [
     r"\bprogramming\b",
     r"\btutorial\b",
     r"\bguide\b",
     r"\bmanual\b",
-    r"\btextbook\b",
     r"\blearning\b",
     r"\bmastering\b",
     r"\bbeginning\b",
     r"\badvanced\b",
-    r"\bintroduction\s+to\b",
-    r"\bfor\s+dummies\b",
-    r"\bcookbook\b",
+    r"\bintroducing\b",
+    r"\bintroduction\b",
     r"\breference\b",
-    r"\bdefinitive\b",
-    r"\bessential\s",
+    r"\bessentials?\b",
     r"\bpractical\b",
     r"\bcomplete\b",
     r"\bcomprehensive\b",
+    r"\bstudy\b",
+    r"\bcertified\b",
+    r"\banalyst\b",
+    r"\bdeveloper\b",
+    r"\bin\s+action\b",       # "Spring in Action"
+    r"\bpro\s+\w+",           # "Pro Git"
+    r"\bhead\s+first\b",      # "Head First Java"
 ]
 
 # Compile patterns
-BOOK_PATTERNS = [re.compile(p, re.IGNORECASE) for p in BOOK_KEYWORDS]
+STRONG_PATTERNS = [re.compile(p, re.IGNORECASE) for p in STRONG_BOOK_KEYWORDS]
+MODERATE_PATTERNS = [re.compile(p, re.IGNORECASE) for p in MODERATE_BOOK_KEYWORDS]
 
 
 class ArchiveBookDetector(BaseDetector):
@@ -125,16 +138,24 @@ class ArchiveBookDetector(BaseDetector):
         # Get stem without extension
         stem = file.path.stem.lower()
 
-        # Count keyword matches
-        match_count = sum(1 for p in BOOK_PATTERNS if p.search(stem))
+        # Check for strong indicators (single match = high confidence)
+        strong_matches = sum(1 for p in STRONG_PATTERNS if p.search(stem))
+        if strong_matches >= 1:
+            return DetectionResult(
+                category="Books",
+                confidence=CONFIDENCE_HIGH,
+                detector_name=self.name,
+                reason="Filename contains strong book indicator",
+            )
 
-        if match_count >= 2:
-            # Multiple book keywords = medium confidence
+        # Check moderate indicators (need 2+ matches)
+        moderate_matches = sum(1 for p in MODERATE_PATTERNS if p.search(stem))
+        if moderate_matches >= 2:
             return DetectionResult(
                 category="Books",
                 confidence=CONFIDENCE_MEDIUM,
                 detector_name=self.name,
-                reason=f"Filename suggests book ({match_count} keywords)",
+                reason=f"Filename suggests book ({moderate_matches} keywords)",
             )
 
         return None
