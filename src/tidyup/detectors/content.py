@@ -4,12 +4,16 @@ This module provides utilities for extracting text content from
 various file types to enable content-based detection.
 """
 
+import logging
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
+
+# Suppress noisy pypdf warnings for malformed PDFs
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 
 def extract_pdf_text(
