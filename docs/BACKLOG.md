@@ -491,6 +491,110 @@ This document tracks all implementation tasks with story points, dependencies, a
 
 ---
 
+## Phase 7: Configurable Category Routing 🔲 Planned
+
+Enable users to create custom categories that actually receive files through configurable routing rules.
+
+**Problem solved:** Currently, adding a custom category (e.g., `tidyup categories add PDF`) creates the folder but no files route there because detectors return hardcoded category names.
+
+**Solution:** Three levels of configuration:
+- Level 1: Remap detector outputs to different categories
+- Level 2: Define keyword/pattern rules for subcategorization
+- Level 3: Smart defaults with static dictionary suggestions
+
+### 7.1 Level 1: Category Remapping
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 7.1.1 | Add `RoutingConfig` dataclass to categories.py | 2 | 🔲 Todo |
+| 7.1.2 | Add `routing.remap` section to config schema | 2 | 🔲 Todo |
+| 7.1.3 | Implement `apply_remap(detector_name, category)` method | 2 | 🔲 Todo |
+| 7.1.4 | Integrate remap into engine.py after detection | 3 | 🔲 Todo |
+| 7.1.5 | Add `tidyup routing list` CLI command | 2 | 🔲 Todo |
+| 7.1.6 | Add `tidyup routing set <detector> <from> <to>` command | 2 | 🔲 Todo |
+| 7.1.7 | Add `tidyup routing remove <detector> <from>` command | 1 | 🔲 Todo |
+| 7.1.8 | Write routing tests | 3 | 🔲 Todo |
+| 7.1.9 | Update USER_GUIDE.md with routing docs | 2 | 🔲 Todo |
+
+**Acceptance Criteria:**
+- [ ] Can remap InvoiceDetector's "Documents" → "Invoices"
+- [ ] Can globally remap "Documents" → "PDF"
+- [ ] Remap persists in config.yaml
+- [ ] CLI commands work for list/set/remove
+
+### 7.2 Level 2: Config-Based Rules
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 7.2.1 | Create `src/tidyup/rules.py` with `CategoryRule` dataclass | 3 | 🔲 Todo |
+| 7.2.2 | Implement keyword matching (filename + content) | 3 | 🔲 Todo |
+| 7.2.3 | Implement glob pattern matching for filenames | 2 | 🔲 Todo |
+| 7.2.4 | Implement extension matching | 1 | 🔲 Todo |
+| 7.2.5 | Add `parent` field to Category for subcategorization | 2 | 🔲 Todo |
+| 7.2.6 | Add `rules` field to Category dataclass | 2 | 🔲 Todo |
+| 7.2.7 | Integrate rules engine into engine.py | 3 | 🔲 Todo |
+| 7.2.8 | Update config schema for category rules | 2 | 🔲 Todo |
+| 7.2.9 | Add `--keywords` and `--parent` to `categories add` | 2 | 🔲 Todo |
+| 7.2.10 | Add `--patterns` to `categories add` | 1 | 🔲 Todo |
+| 7.2.11 | Write rules engine tests | 5 | 🔲 Todo |
+| 7.2.12 | Update USER_GUIDE.md with rules docs | 2 | 🔲 Todo |
+
+**Acceptance Criteria:**
+- [ ] Can create "Technical Books" as subcategory of "Books" with keywords
+- [ ] Can create "Client Work" with filename patterns
+- [ ] Rules evaluated after detector, before folder lookup
+- [ ] Multiple rules can match; first match wins
+
+### 7.3 Level 3a: Smart Defaults (Static Dictionary)
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 7.3.1 | Create `src/tidyup/suggestions.py` | 2 | 🔲 Todo |
+| 7.3.2 | Build CATEGORY_SUGGESTIONS dictionary (~50 patterns) | 5 | 🔲 Todo |
+| 7.3.3 | Build PARENT_INFERENCE dictionary | 2 | 🔲 Todo |
+| 7.3.4 | Implement `suggest_rules(category_name)` function | 2 | 🔲 Todo |
+| 7.3.5 | Integrate suggestions into `categories add` CLI | 3 | 🔲 Todo |
+| 7.3.6 | Add `--no-suggestions` flag to skip suggestions | 1 | 🔲 Todo |
+| 7.3.7 | Add interactive accept/edit/skip for suggestions | 3 | 🔲 Todo |
+| 7.3.8 | Write suggestions tests | 3 | 🔲 Todo |
+| 7.3.9 | Update USER_GUIDE.md with suggestions docs | 2 | 🔲 Todo |
+
+**Dictionary coverage targets:**
+- [ ] Programming/Tech: programming, software, code, developer, api
+- [ ] Design: design, figma, sketch, photoshop, illustrator, ui, ux
+- [ ] Finance: invoice, receipt, bill, payment, bank, tax
+- [ ] Work: project, client, meeting, report, presentation
+- [ ] Personal: family, vacation, photo, birthday
+- [ ] Academic: paper, research, thesis, journal, arxiv
+- [ ] Media: photo, video, music, podcast
+- [ ] Legal: contract, agreement, legal, attorney
+
+**Acceptance Criteria:**
+- [ ] `tidyup categories add "Technical Books"` suggests keywords
+- [ ] User can accept, edit, or skip suggestions
+- [ ] Dictionary covers common use cases for various professions
+
+### 7.4 Integration and Polish
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 7.4.1 | End-to-end integration tests | 5 | 🔲 Todo |
+| 7.4.2 | Test with real Downloads folder scenarios | 3 | 🔲 Todo |
+| 7.4.3 | Performance testing (rules evaluation time) | 2 | 🔲 Todo |
+| 7.4.4 | Update manual testing script | 2 | 🔲 Todo |
+| 7.4.5 | Final documentation review | 2 | 🔲 Todo |
+
+**Phase 7 Acceptance Criteria:**
+- [ ] User can redirect existing detector outputs (Level 1)
+- [ ] User can create subcategories with keyword rules (Level 2)
+- [ ] CLI suggests rules when creating categories (Level 3a)
+- [ ] All tests pass
+- [ ] Documentation complete
+
+**Estimated total:** ~80 story points
+
+---
+
 ## Summary
 
 | Phase | Status | Tests |
@@ -503,6 +607,7 @@ This document tracks all implementation tasks with story points, dependencies, a
 | 4.5 Content-Based Enhancements | ✅ Complete | 80 |
 | 5. Safety & Polish | 🟡 Partial | - |
 | 6. Quality & Release | 🟡 Partial | - |
+| 7. Configurable Routing | 🔲 Planned | - |
 | **Total** | | **323 tests** |
 
 ---
@@ -524,3 +629,11 @@ Not scheduled for v1.0:
 - [ ] **Duplicate finder**: Scan destination for duplicates
 - [ ] **Undo command**: Reverse most recent run from logs
 - [ ] **GUI wrapper**: Simple native macOS app
+
+### AI-Powered Detection (Post v1.0)
+
+See [FUTURE_DIRECTIONS.md](FUTURE_DIRECTIONS.md) for detailed roadmap.
+
+- [ ] **Level 4: LLM-Powered Detection**: Use Claude/GPT to classify ambiguous files
+- [ ] **Level 5: Hybrid Architecture**: Fast rules + LLM fallback
+- [ ] **Local LLM support**: Ollama integration for privacy-focused users
