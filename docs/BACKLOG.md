@@ -240,44 +240,87 @@ This document tracks all implementation tasks with story points, dependencies, a
 
 ---
 
-## Phase 4: Renamers 🔲 Not Started
+## Phase 4: Renamers ✅ Complete
 
-### 4.1 Renamer Framework
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 4.1.1 | `BaseRenamer` abstract class | 2 | Todo |
-| 4.1.2 | `format_date()` helper | 1 | ✅ Done (in utils) |
-| 4.1.3 | `format_datetime()` helper | 1 | Todo |
-| 4.1.4 | `RenamerRegistry` | 2 | Todo |
-| 4.1.5 | Framework tests | 2 | Todo |
-
-### 4.2 Generic Renamer
+### 4.1 Renamer Framework ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 4.2.1 | `GenericRenamer` | 2 | Partial (in engine) |
+| 4.1.1 | `BaseRenamer` abstract class | 2 | ✅ Done |
+| 4.1.2 | `format_date()` helper (YYYY-MM-DD) | 1 | ✅ Done |
+| 4.1.3 | `format_datetime()` helper (YYYY-MM-DD_HH-MM-SS) | 1 | ✅ Done |
+| 4.1.4 | `RenamerRegistry` with detector-based lookup | 2 | ✅ Done |
+| 4.1.5 | Framework tests | 2 | ✅ Done |
+
+### 4.2 Generic Renamer ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 4.2.1 | `GenericRenamer` class | 2 | ✅ Done |
 | 4.2.2 | Pattern: `{date}_{sanitized_name}.{ext}` | 2 | ✅ Done |
-| 4.2.3 | Handle "ugly names" (random strings) | 2 | ✅ Done |
-| 4.2.4 | Tests | 2 | ✅ Done |
+| 4.2.3 | Handle "ugly names" (random strings, hashes) | 2 | ✅ Done |
+| 4.2.4 | Keep nice filenames unchanged | 1 | ✅ Done |
+| 4.2.5 | Tests | 2 | ✅ Done |
 
-### 4.3 PDF Renamer
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 4.3.1-6 | PDF metadata extraction, title fallback, tests | 12 | Todo |
-
-### 4.4 Image Renamer
+### 4.3 PDF Renamer ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 4.4.1-5 | EXIF date extraction, fallback, tests | 9 | Todo |
+| 4.3.1 | `extract_pdf_metadata()` for title and creation date | 3 | ✅ Done |
+| 4.3.2 | `extract_title_from_text()` fallback to text heading | 2 | ✅ Done |
+| 4.3.3 | Validate extracted title (length, garbage detection) | 2 | ✅ Done |
+| 4.3.4 | `PDFRenamer` class | 2 | ✅ Done |
+| 4.3.5 | Pattern: `{date}_{title}.pdf` | 1 | ✅ Done |
+| 4.3.6 | Tests | 2 | ✅ Done |
 
-### 4.5 Category-Specific Renamers
+### 4.4 Image Renamer ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 4.5.1-6 | Invoice, Screenshot, arXiv, Book renamers | 15 | Todo |
+| 4.4.1 | `extract_exif_date()` using Pillow | 3 | ✅ Done |
+| 4.4.2 | Try DateTimeOriginal, DateTimeDigitized, DateTime | 1 | ✅ Done |
+| 4.4.3 | `ImageRenamer` class | 2 | ✅ Done |
+| 4.4.4 | Pattern: `{exif_date}_{original_name}.{ext}` | 1 | ✅ Done |
+| 4.4.5 | Tests | 2 | ✅ Done |
+
+### 4.5 Category-Specific Renamers ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 4.5.1 | `ScreenshotRenamer` - standardize to `Screenshot_{date}_{time}.{ext}` | 3 | ✅ Done |
+| 4.5.2 | Screenshot datetime extraction (macOS, Windows, CleanShot patterns) | 2 | ✅ Done |
+| 4.5.3 | `ArxivRenamer` - pattern `{date}_{arxiv_id}.pdf` | 2 | ✅ Done |
+| 4.5.4 | `InvoiceRenamer` - pattern `{date}_Invoice_{vendor}.pdf` | 3 | ✅ Done |
+| 4.5.5 | Vendor extraction from invoice text | 2 | ✅ Done |
+| 4.5.6 | Tests | 3 | ✅ Done |
+
+### 4.6 Integration ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 4.6.1 | Wire `RenamerRegistry` into engine | 2 | ✅ Done |
+| 4.6.2 | Register all renamers by detector name | 1 | ✅ Done |
+| 4.6.3 | Integration tests | 2 | ✅ Done |
+
+**Phase 4 Acceptance Criteria:** ✅ All met
+- [x] BaseRenamer abstract class with rename() method
+- [x] RenamerRegistry maps detectors to specialized renamers
+- [x] GenericRenamer as fallback for ugly names
+- [x] PDFRenamer extracts title from metadata/text
+- [x] ImageRenamer uses EXIF dates
+- [x] ScreenshotRenamer standardizes patterns
+- [x] ArxivRenamer keeps ID with date prefix
+- [x] InvoiceRenamer extracts vendor name
+- [x] Engine uses renamer registry
+- [x] All renamer tests pass (22 tests)
+
+**Renamers Implemented:**
+1. GenericRenamer (default fallback)
+2. PDFRenamer (for GenericDetector with PDFs)
+3. ImageRenamer (for photos with EXIF)
+4. ScreenshotRenamer (for ScreenshotDetector)
+5. ArxivRenamer (for ArxivDetector)
+6. InvoiceRenamer (for InvoiceDetector)
 
 ---
 
@@ -357,10 +400,10 @@ This document tracks all implementation tasks with story points, dependencies, a
 | 2. Core Engine | ✅ Complete | 148 |
 | 2.5 Documentation | ✅ Complete | - |
 | 3. Detectors | ✅ Complete | 71 |
-| 4. Renamers | 🔲 Not Started | - |
+| 4. Renamers | ✅ Complete | 22 |
 | 5. Safety & Polish | 🟡 Partial | - |
 | 6. Quality & Release | 🟡 Partial | - |
-| **Total** | | **219 tests** |
+| **Total** | | **241 tests** |
 
 ---
 
