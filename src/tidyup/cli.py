@@ -145,11 +145,14 @@ def run_organize(source: Path, destination: Optional[Path], options: dict) -> No
                     "skipped": "dim",
                 }.get(action.status, "white")
 
+                # Show category folder + filename for destination
+                dest_display = f"{action.detection.category}/{action.dest_path.name}"
+
                 table.add_row(
                     action.file.name,
                     action.detection.category,
                     f"[{status_style}]{action.status}[/{status_style}]",
-                    str(action.dest_path.name),
+                    dest_display,
                 )
 
             console.print(table)
