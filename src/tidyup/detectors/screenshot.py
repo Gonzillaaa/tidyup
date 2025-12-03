@@ -87,7 +87,7 @@ class ScreenshotDetector(BaseDetector):
         for pattern in COMPILED_PATTERNS:
             if pattern.match(stem):
                 return DetectionResult(
-                    category="02_Images",
+                    category="Screenshots",
                     confidence=CONFIDENCE_HIGH,
                     detector_name=self.name,
                 )

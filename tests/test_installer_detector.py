@@ -21,7 +21,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
         assert result.confidence == CONFIDENCE_HIGH
 
     def test_detects_pkg(self, tmp_path: Path) -> None:
@@ -34,7 +34,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
 
     def test_detects_exe(self, tmp_path: Path) -> None:
         """Detects Windows executables."""
@@ -46,7 +46,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
 
     def test_detects_msi(self, tmp_path: Path) -> None:
         """Detects Windows installer packages."""
@@ -58,7 +58,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
 
     def test_detects_deb(self, tmp_path: Path) -> None:
         """Detects Debian packages."""
@@ -70,7 +70,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
 
     def test_detects_appimage(self, tmp_path: Path) -> None:
         """Detects Linux AppImages."""
@@ -82,7 +82,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
 
     def test_ignores_non_installer(self, tmp_path: Path) -> None:
         """Ignores non-installer files."""
@@ -105,7 +105,7 @@ class TestInstallerDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "09_Installers"
+        assert result.category == "Installers"
 
     def test_priority_is_set(self) -> None:
         """Detector has correct priority."""
@@ -129,4 +129,4 @@ class TestInstallerDetector:
             result = detector.detect(file)
 
             assert result is not None, f"Failed to detect .{ext}"
-            assert result.category == "09_Installers", f"Wrong category for .{ext}"
+            assert result.category == "Installers", f"Wrong category for .{ext}"

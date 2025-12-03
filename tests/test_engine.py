@@ -61,7 +61,7 @@ class TestDetectCategory:
 
         result = engine.detect_category(file)
 
-        assert result.category == "01_Documents"
+        assert result.category == "Documents"
         assert result.confidence >= 0.7
 
     def test_detects_image_extensions(self, tmp_path: Path) -> None:
@@ -75,7 +75,7 @@ class TestDetectCategory:
 
             result = engine.detect_category(file)
 
-            assert result.category == "02_Images", f"Failed for .{ext}"
+            assert result.category == "Images", f"Failed for .{ext}"
 
     def test_unknown_extension_is_unsorted(self, tmp_path: Path) -> None:
         """Unknown extensions go to Unsorted."""
@@ -86,7 +86,7 @@ class TestDetectCategory:
 
         result = engine.detect_category(file)
 
-        assert result.category == "99_Unsorted"
+        assert result.category == "Unsorted"
         assert result.confidence < 0.7
         assert result.reason is not None
 
@@ -143,7 +143,7 @@ class TestProcessFile:
 
         assert action is not None
         assert action.status == "success"
-        assert action.detection.category == "01_Documents"
+        assert action.detection.category == "Documents"
 
     def test_skips_uncertain_with_skip_flag(self, tmp_path: Path) -> None:
         """Skips uncertain files when --skip is set."""

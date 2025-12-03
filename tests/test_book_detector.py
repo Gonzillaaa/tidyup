@@ -22,7 +22,7 @@ class TestBookDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "07_Books"
+        assert result.category == "Books"
         assert result.confidence == CONFIDENCE_HIGH
 
     def test_detects_mobi(self, tmp_path: Path) -> None:
@@ -35,7 +35,7 @@ class TestBookDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "07_Books"
+        assert result.category == "Books"
 
     def test_detects_azw3(self, tmp_path: Path) -> None:
         """Detects azw3 files as books."""
@@ -47,7 +47,7 @@ class TestBookDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "07_Books"
+        assert result.category == "Books"
 
     def test_ignores_non_book_extensions(self, tmp_path: Path) -> None:
         """Ignores files with non-book extensions."""

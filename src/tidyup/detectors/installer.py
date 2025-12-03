@@ -55,7 +55,7 @@ class InstallerDetector(BaseDetector):
 
         if ext in INSTALLER_EXTENSIONS:
             return DetectionResult(
-                category="09_Installers",
+                category="Installers",
                 confidence=CONFIDENCE_HIGH,
                 detector_name=self.name,
                 reason=f"Installer format (.{ext})",

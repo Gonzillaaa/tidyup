@@ -61,7 +61,7 @@ class DetectorRegistry:
         if not results:
             # No detector matched
             return DetectionResult(
-                category="99_Unsorted",
+                category="Unsorted",
                 confidence=0.0,
                 detector_name="None",
                 reason="No detector matched this file",
@@ -95,12 +95,16 @@ def _register_default_detectors(registry: DetectorRegistry) -> None:
     from .invoice import InvoiceDetector
     from .book import BookDetector
     from .installer import InstallerDetector
+    from .paper import PaperDetector
+    from .archive_book import ArchiveBookDetector
 
     # Register in priority order (more specific first)
     registry.register(ScreenshotDetector())  # priority=10
     registry.register(ArxivDetector())  # priority=10
+    registry.register(PaperDetector())  # priority=12
     registry.register(InvoiceDetector())  # priority=15
     registry.register(InstallerDetector())  # priority=15
+    registry.register(ArchiveBookDetector())  # priority=18
     registry.register(BookDetector())  # priority=20
     registry.register(GenericDetector())  # priority=50
 

@@ -47,7 +47,7 @@ class ArxivDetector(BaseDetector):
 
         if ARXIV_PATTERN.match(stem):
             return DetectionResult(
-                category="01_Documents",  # Papers go to Documents
+                category="Papers",
                 confidence=CONFIDENCE_HIGH,
                 detector_name=self.name,
             )

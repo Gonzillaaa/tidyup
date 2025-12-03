@@ -72,7 +72,7 @@ class BookDetector(BaseDetector):
         # Ebook extensions are definitely books
         if ext in EBOOK_EXTENSIONS:
             return DetectionResult(
-                category="07_Books",
+                category="Books",
                 confidence=CONFIDENCE_HIGH,
                 detector_name=self.name,
                 reason=f"Ebook format (.{ext})",
@@ -89,7 +89,7 @@ class BookDetector(BaseDetector):
         # ISBN is a strong indicator
         if ISBN_GENERIC.search(text):
             return DetectionResult(
-                category="07_Books",
+                category="Books",
                 confidence=CONFIDENCE_HIGH,
                 detector_name=self.name,
                 reason="Contains ISBN",
@@ -101,7 +101,7 @@ class BookDetector(BaseDetector):
         if match_count >= 4:
             # Many book keywords = high confidence
             return DetectionResult(
-                category="07_Books",
+                category="Books",
                 confidence=CONFIDENCE_HIGH,
                 detector_name=self.name,
                 reason=f"Contains {match_count} book keywords",
@@ -109,7 +109,7 @@ class BookDetector(BaseDetector):
         elif match_count >= 2:
             # Some keywords = medium confidence
             return DetectionResult(
-                category="07_Books",
+                category="Books",
                 confidence=CONFIDENCE_MEDIUM,
                 detector_name=self.name,
                 reason="Contains book-related keywords",

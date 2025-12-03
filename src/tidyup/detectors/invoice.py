@@ -91,7 +91,7 @@ class InvoiceDetector(BaseDetector):
         for pattern in STRONG_INDICATORS:
             if pattern.search(text):
                 return DetectionResult(
-                    category="01_Documents",
+                    category="Documents",
                     confidence=CONFIDENCE_HIGH,
                     detector_name=self.name,
                     reason="Contains invoice-specific fields",
@@ -103,7 +103,7 @@ class InvoiceDetector(BaseDetector):
         if match_count >= 3:
             # Multiple keywords = high confidence
             return DetectionResult(
-                category="01_Documents",
+                category="Documents",
                 confidence=CONFIDENCE_HIGH,
                 detector_name=self.name,
                 reason=f"Contains {match_count} invoice keywords",
@@ -111,7 +111,7 @@ class InvoiceDetector(BaseDetector):
         elif match_count >= 1:
             # Single keyword = medium confidence
             return DetectionResult(
-                category="01_Documents",
+                category="Documents",
                 confidence=CONFIDENCE_MEDIUM,
                 detector_name=self.name,
                 reason="Contains invoice-related keywords",

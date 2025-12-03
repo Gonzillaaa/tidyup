@@ -67,7 +67,7 @@ class TestDetectorRegistry:
 
         result = registry.detect(file)
 
-        assert result.category == "01_Documents"
+        assert result.category == "Documents"
         assert result.confidence == CONFIDENCE_MEDIUM
 
     def test_detect_returns_unsorted_when_no_match(self, tmp_path: Path) -> None:
@@ -81,7 +81,7 @@ class TestDetectorRegistry:
 
         result = registry.detect(file)
 
-        assert result.category == "99_Unsorted"
+        assert result.category == "Unsorted"
         assert result.confidence == 0.0
 
     def test_priority_breaks_ties(self, tmp_path: Path) -> None:
@@ -113,7 +113,7 @@ class TestGenericDetector:
 
         result = detector.detect(file)
 
-        assert result.category == "01_Documents"
+        assert result.category == "Documents"
         assert result.confidence == CONFIDENCE_MEDIUM
 
     def test_detects_images(self, tmp_path: Path) -> None:
@@ -127,7 +127,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "02_Images", f"Failed for .{ext}"
+            assert result.category == "Images", f"Failed for .{ext}"
 
     def test_detects_videos(self, tmp_path: Path) -> None:
         """Video files detected as Videos."""
@@ -140,7 +140,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "03_Videos", f"Failed for .{ext}"
+            assert result.category == "Videos", f"Failed for .{ext}"
 
     def test_detects_audio(self, tmp_path: Path) -> None:
         """Audio files detected as Audio."""
@@ -153,7 +153,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "04_Audio", f"Failed for .{ext}"
+            assert result.category == "Audio", f"Failed for .{ext}"
 
     def test_detects_archives(self, tmp_path: Path) -> None:
         """Archive files detected as Archives."""
@@ -166,7 +166,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "05_Archives", f"Failed for .{ext}"
+            assert result.category == "Archives", f"Failed for .{ext}"
 
     def test_detects_code(self, tmp_path: Path) -> None:
         """Code files detected as Code."""
@@ -179,7 +179,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "06_Code", f"Failed for .{ext}"
+            assert result.category == "Code", f"Failed for .{ext}"
 
     def test_detects_books(self, tmp_path: Path) -> None:
         """Book files detected as Books."""
@@ -192,7 +192,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "07_Books", f"Failed for .{ext}"
+            assert result.category == "Books", f"Failed for .{ext}"
 
     def test_detects_data(self, tmp_path: Path) -> None:
         """Data files detected as Data."""
@@ -205,7 +205,7 @@ class TestGenericDetector:
 
             result = detector.detect(file)
 
-            assert result.category == "08_Data", f"Failed for .{ext}"
+            assert result.category == "Data", f"Failed for .{ext}"
 
     def test_unknown_extension_is_unsorted(self, tmp_path: Path) -> None:
         """Unknown extensions go to Unsorted with low confidence."""
@@ -216,7 +216,7 @@ class TestGenericDetector:
 
         result = detector.detect(file)
 
-        assert result.category == "99_Unsorted"
+        assert result.category == "Unsorted"
         assert result.confidence < CONFIDENCE_MEDIUM
         assert result.reason is not None
 
@@ -229,7 +229,7 @@ class TestGenericDetector:
 
         result = detector.detect(file)
 
-        assert result.category == "02_Images"
+        assert result.category == "Images"
 
 
 class TestScreenshotDetector:
@@ -245,7 +245,7 @@ class TestScreenshotDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "02_Images"
+        assert result.category == "Screenshots"
         assert result.confidence == CONFIDENCE_HIGH
 
     def test_detects_macos_new_screenshot(self, tmp_path: Path) -> None:
@@ -329,7 +329,7 @@ class TestArxivDetector:
         result = detector.detect(file)
 
         assert result is not None
-        assert result.category == "01_Documents"
+        assert result.category == "Papers"
         assert result.confidence == CONFIDENCE_HIGH
 
     def test_detects_arxiv_with_version(self, tmp_path: Path) -> None:
@@ -405,3 +405,5 @@ class TestGlobalRegistry:
         assert "InvoiceDetector" in names
         assert "BookDetector" in names
         assert "InstallerDetector" in names
+        assert "PaperDetector" in names
+        assert "ArchiveBookDetector" in names
