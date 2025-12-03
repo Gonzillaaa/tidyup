@@ -4,15 +4,12 @@ Renames book files using metadata (title, author, year).
 """
 
 import re
-import zipfile
 import xml.etree.ElementTree as ET
-from datetime import datetime
-from typing import Optional
+import zipfile
 
 from ..models import DetectionResult, FileInfo, RenameResult
 from ..utils import sanitize_filename
 from .base import BaseRenamer
-
 
 # Maximum title length for filename
 MAX_TITLE_LENGTH = 60
@@ -34,7 +31,7 @@ class BookRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate a new filename for a book.
 
         Args:
@@ -72,7 +69,7 @@ class BookRenamer(BaseRenamer):
             title_extracted=metadata.get("title"),
         )
 
-    def _extract_pdf_metadata(self, file: FileInfo) -> Optional[dict]:
+    def _extract_pdf_metadata(self, file: FileInfo) -> dict | None:
         """Extract metadata from PDF file."""
         try:
             import pypdf
@@ -108,7 +105,7 @@ class BookRenamer(BaseRenamer):
         except Exception:
             return None
 
-    def _extract_epub_metadata(self, file: FileInfo) -> Optional[dict]:
+    def _extract_epub_metadata(self, file: FileInfo) -> dict | None:
         """Extract metadata from EPUB file."""
         try:
             with zipfile.ZipFile(file.path, "r") as zf:
@@ -164,7 +161,7 @@ class BookRenamer(BaseRenamer):
         except Exception:
             return None
 
-    def _find_opf_in_epub(self, zf: zipfile.ZipFile) -> Optional[str]:
+    def _find_opf_in_epub(self, zf: zipfile.ZipFile) -> str | None:
         """Find the OPF file path in an EPUB."""
         try:
             # First, look in META-INF/container.xml
@@ -175,7 +172,6 @@ class BookRenamer(BaseRenamer):
                     root = tree.getroot()
 
                     # Find rootfile element
-                    ns = {"cont": "urn:oasis:names:tc:opendocument:xmlns:container"}
                     for rootfile in root.iter():
                         if "rootfile" in rootfile.tag:
                             opf_path = rootfile.get("full-path")
@@ -197,7 +193,7 @@ class BookRenamer(BaseRenamer):
         metadata: ET.Element,
         name: str,
         ns: dict,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Find a Dublin Core element in metadata."""
         # Try with namespace
         elem = metadata.find(f"dc:{name}", ns)
@@ -212,7 +208,7 @@ class BookRenamer(BaseRenamer):
 
         return None
 
-    def _extract_from_filename(self, file: FileInfo) -> Optional[dict]:
+    def _extract_from_filename(self, file: FileInfo) -> dict | None:
         """Extract metadata from filename patterns."""
         stem = file.path.stem
 

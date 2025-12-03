@@ -4,10 +4,10 @@ This module contains all the dataclasses used throughout the application
 for representing files, detection results, actions, and run summaries.
 """
 
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, date
+from dataclasses import asdict, dataclass, field
+from datetime import date, datetime
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
 
 @dataclass
@@ -69,7 +69,7 @@ class DetectionResult:
     category: str
     confidence: float
     detector_name: str
-    reason: Optional[str] = None
+    reason: str | None = None
 
     def is_confident(self, threshold: float = 0.7) -> bool:
         """Check if detection meets confidence threshold."""
@@ -102,8 +102,8 @@ class RenameResult:
     original_name: str
     new_name: str
     renamer_name: str
-    date_extracted: Optional[date] = None
-    title_extracted: Optional[str] = None
+    date_extracted: date | None = None
+    title_extracted: str | None = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
@@ -141,8 +141,8 @@ class Action:
     source_path: Path
     dest_path: Path
     status: ActionStatus = "pending"
-    rename: Optional[RenameResult] = None
-    error: Optional[str] = None
+    rename: RenameResult | None = None
+    error: str | None = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""

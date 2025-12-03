@@ -4,12 +4,10 @@ Detects research papers and academic documents by content analysis.
 """
 
 import re
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH, CONFIDENCE_MEDIUM
+from .base import CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, BaseDetector
 from .content import extract_pdf_text_cached
-
 
 # DOI patterns
 DOI_PATTERN = re.compile(r"\b10\.\d{4,}/[^\s]+\b")
@@ -71,7 +69,7 @@ class PaperDetector(BaseDetector):
     def name(self) -> str:
         return "PaperDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if file is an academic paper.
 
         Args:

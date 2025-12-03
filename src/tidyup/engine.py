@@ -5,7 +5,6 @@ file discovery, detection, renaming, moving, and logging.
 """
 
 from pathlib import Path
-from typing import Optional
 
 from .categories import get_category_manager
 from .detectors import get_registry
@@ -44,8 +43,8 @@ class Engine:
     def __init__(
         self,
         source: Path,
-        destination: Optional[Path] = None,
-        options: Optional[dict] = None,
+        destination: Path | None = None,
+        options: dict | None = None,
     ) -> None:
         """Initialize the engine.
 
@@ -103,7 +102,7 @@ class Engine:
             # Unknown category falls back to Unsorted
             return manager.get_folder_name("Unsorted")
 
-    def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> Optional[RenameResult]:
+    def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> RenameResult | None:
         """Generate a new filename for a file.
 
         Uses the renamer registry to find the appropriate renamer
@@ -123,7 +122,7 @@ class Engine:
         self,
         file: FileInfo,
         logger: ActionLogger,
-    ) -> Optional[Action]:
+    ) -> Action | None:
         """Process a single file through the pipeline.
 
         Args:

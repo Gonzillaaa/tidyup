@@ -6,10 +6,8 @@ and modified via CLI commands.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 import yaml
-
 
 # Default categories in order (position determines number)
 DEFAULT_CATEGORIES = [
@@ -70,7 +68,7 @@ class CategoryManager:
     """
 
     categories: list[Category] = field(default_factory=list)
-    config_path: Optional[Path] = None
+    config_path: Path | None = None
 
     def __post_init__(self) -> None:
         """Set default config path if not provided."""
@@ -140,7 +138,7 @@ class CategoryManager:
         with open(self.config_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
-    def get_by_name(self, name: str) -> Optional[Category]:
+    def get_by_name(self, name: str) -> Category | None:
         """Get category by name (case-insensitive).
 
         Args:
@@ -172,7 +170,7 @@ class CategoryManager:
             raise ValueError(f"Unknown category: {name}")
         return cat.folder_name
 
-    def add(self, name: str, position: Optional[int] = None) -> Category:
+    def add(self, name: str, position: int | None = None) -> Category:
         """Add a new category at the specified position.
 
         Args:
@@ -370,7 +368,7 @@ class CategoryManager:
 
 
 # Global instance
-_manager: Optional[CategoryManager] = None
+_manager: CategoryManager | None = None
 
 
 def get_category_manager() -> CategoryManager:

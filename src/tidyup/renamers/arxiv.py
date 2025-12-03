@@ -4,11 +4,9 @@ Keeps arXiv ID but adds date prefix.
 """
 
 import re
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo, RenameResult
 from .base import BaseRenamer, format_date
-
 
 # arXiv ID pattern: YYMM.NNNNN or YYMM.NNNNNvN
 ARXIV_ID_PATTERN = re.compile(r"(\d{4}\.\d{4,5})(v\d+)?")
@@ -34,7 +32,7 @@ class ArxivRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate arXiv filename with date prefix.
 
         Args:

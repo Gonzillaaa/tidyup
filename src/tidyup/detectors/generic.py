@@ -3,11 +3,9 @@
 This detector categorizes files based on their file extension.
 """
 
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH, CONFIDENCE_MEDIUM
-
+from .base import CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, BaseDetector
 
 # Extension to category mapping (uses category names, not folder names)
 EXTENSION_MAP: dict[str, tuple[str, float]] = {
@@ -121,7 +119,7 @@ class GenericDetector(BaseDetector):
     def name(self) -> str:
         return "GenericDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect file type by extension.
 
         Args:

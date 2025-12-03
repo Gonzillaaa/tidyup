@@ -4,12 +4,10 @@ Detects invoice and receipt documents by content analysis.
 """
 
 import re
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH, CONFIDENCE_MEDIUM
+from .base import CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, BaseDetector
 from .content import extract_pdf_text_cached
-
 
 # Invoice keywords in multiple languages
 INVOICE_KEYWORDS = [
@@ -68,7 +66,7 @@ class InvoiceDetector(BaseDetector):
     def name(self) -> str:
         return "InvoiceDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if file is an invoice or receipt.
 
         Args:

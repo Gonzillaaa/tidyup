@@ -5,10 +5,8 @@ and confidence level constants.
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-
 
 # Confidence level constants
 CONFIDENCE_HIGH = 0.9
@@ -37,7 +35,7 @@ class BaseDetector(ABC):
         ...
 
     @abstractmethod
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Attempt to detect the file type.
 
         Args:

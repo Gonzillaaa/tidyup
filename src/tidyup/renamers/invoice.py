@@ -4,13 +4,11 @@ Extracts vendor name and date for invoice filenames.
 """
 
 import re
-from typing import Optional
 
 from ..detectors.content import extract_pdf_text_cached
 from ..models import DetectionResult, FileInfo, RenameResult
 from ..utils import sanitize_filename
 from .base import BaseRenamer, format_date
-
 
 # Patterns to extract vendor/company names
 VENDOR_PATTERNS = [
@@ -23,7 +21,7 @@ VENDOR_PATTERNS = [
 ]
 
 
-def extract_vendor_name(text: str) -> Optional[str]:
+def extract_vendor_name(text: str) -> str | None:
     """Extract vendor/company name from invoice text.
 
     Args:
@@ -64,7 +62,7 @@ class InvoiceRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate invoice filename with vendor.
 
         Args:

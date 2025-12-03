@@ -3,7 +3,6 @@
 This is the fallback renamer used when no specialized renamer matches.
 """
 
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo, RenameResult
 from ..utils import sanitize_filename
@@ -27,7 +26,7 @@ class GenericRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate a new filename using date and sanitized name.
 
         Args:

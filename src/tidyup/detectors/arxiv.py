@@ -4,11 +4,9 @@ Detects arXiv preprints by their distinctive filename pattern.
 """
 
 import re
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH
-
+from .base import CONFIDENCE_HIGH, BaseDetector
 
 # arXiv filename pattern: YYMM.NNNNN or YYMM.NNNNNvN
 # Examples: 2501.12948.pdf, 2501.12948v1.pdf, 2501.12948v2.pdf
@@ -28,7 +26,7 @@ class ArxivDetector(BaseDetector):
     def name(self) -> str:
         return "ArxivDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if file is an arXiv paper.
 
         Args:

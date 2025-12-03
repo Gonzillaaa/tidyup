@@ -3,8 +3,6 @@
 This module provides the renamer registry and imports all renamers.
 """
 
-from typing import Optional
-
 from ..models import DetectionResult, FileInfo, RenameResult
 from .base import BaseRenamer, format_date, format_datetime
 
@@ -23,7 +21,7 @@ class RenamerRegistry:
     def __init__(self) -> None:
         """Initialize an empty registry."""
         self.renamers: dict[str, BaseRenamer] = {}
-        self.default_renamer: Optional[BaseRenamer] = None
+        self.default_renamer: BaseRenamer | None = None
 
     def register(self, detector_name: str, renamer: BaseRenamer) -> None:
         """Register a renamer for a detector.
@@ -46,7 +44,7 @@ class RenamerRegistry:
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Rename a file using the appropriate renamer.
 
         Args:
@@ -72,7 +70,7 @@ class RenamerRegistry:
 
 
 # Global registry instance
-_registry: Optional[RenamerRegistry] = None
+_registry: RenamerRegistry | None = None
 
 
 def get_renamer_registry() -> RenamerRegistry:
@@ -86,13 +84,12 @@ def get_renamer_registry() -> RenamerRegistry:
 
 def _register_default_renamers(registry: RenamerRegistry) -> None:
     """Register all default renamers."""
-    from .generic import GenericRenamer
-    from .pdf import PDFRenamer
-    from .image import ImageRenamer
-    from .screenshot import ScreenshotRenamer
     from .arxiv import ArxivRenamer
-    from .invoice import InvoiceRenamer
     from .book import BookRenamer
+    from .generic import GenericRenamer
+    from .invoice import InvoiceRenamer
+    from .pdf import PDFRenamer
+    from .screenshot import ScreenshotRenamer
 
     # Set default renamer
     registry.set_default(GenericRenamer())

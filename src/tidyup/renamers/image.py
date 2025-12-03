@@ -4,7 +4,6 @@ Extracts date from image EXIF metadata for smart renaming.
 """
 
 from datetime import datetime
-from typing import Optional
 
 from PIL import Image
 from PIL.ExifTags import TAGS
@@ -13,12 +12,11 @@ from ..models import DetectionResult, FileInfo, RenameResult
 from ..utils import sanitize_filename
 from .base import BaseRenamer, format_date
 
-
 # Image extensions that may contain EXIF
 EXIF_EXTENSIONS = {"jpg", "jpeg", "tiff", "tif", "heic", "heif"}
 
 
-def extract_exif_date(file: FileInfo) -> Optional[datetime]:
+def extract_exif_date(file: FileInfo) -> datetime | None:
     """Extract date from image EXIF metadata.
 
     Tries multiple EXIF date fields in order of preference.
@@ -72,7 +70,7 @@ class ImageRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate a new filename using EXIF date.
 
         Args:

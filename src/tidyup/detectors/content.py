@@ -7,7 +7,6 @@ various file types to enable content-based detection.
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -20,7 +19,7 @@ def extract_pdf_text(
     path: Path,
     max_pages: int = 2,
     max_chars: int = 5000,
-) -> Optional[str]:
+) -> str | None:
     """Extract text from the first pages of a PDF.
 
     Args:
@@ -64,7 +63,7 @@ def extract_pdf_text_cached(
     path: str,
     max_pages: int = 2,
     max_chars: int = 5000,
-) -> Optional[str]:
+) -> str | None:
     """Cached version of extract_pdf_text.
 
     Uses string path for hashability in LRU cache.

@@ -5,11 +5,9 @@ operating systems and languages.
 """
 
 import re
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH
-
+from .base import CONFIDENCE_HIGH, BaseDetector
 
 # Screenshot filename patterns
 SCREENSHOT_PATTERNS = [
@@ -67,7 +65,7 @@ class ScreenshotDetector(BaseDetector):
     def name(self) -> str:
         return "ScreenshotDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if file is a screenshot.
 
         Args:

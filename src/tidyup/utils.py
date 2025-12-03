@@ -9,7 +9,6 @@ import re
 import unicodedata
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 def sanitize_filename(name: str, max_length: int = 200) -> str:

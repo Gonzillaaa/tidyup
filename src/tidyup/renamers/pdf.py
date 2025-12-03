@@ -6,7 +6,6 @@ Extracts title and date from PDF metadata for smart renaming.
 import logging
 import re
 from datetime import datetime
-from typing import Optional
 
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
@@ -19,7 +18,7 @@ from .base import BaseRenamer, format_date
 logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 
-def extract_pdf_metadata(file: FileInfo) -> tuple[Optional[str], Optional[datetime]]:
+def extract_pdf_metadata(file: FileInfo) -> tuple[str | None, datetime | None]:
     """Extract title and date from PDF metadata.
 
     Args:
@@ -54,7 +53,7 @@ def extract_pdf_metadata(file: FileInfo) -> tuple[Optional[str], Optional[dateti
         return None, None
 
 
-def extract_title_from_text(file: FileInfo) -> Optional[str]:
+def extract_title_from_text(file: FileInfo) -> str | None:
     """Extract title from PDF text content.
 
     Looks for the first substantial line of text that could be a title.
@@ -110,7 +109,7 @@ class PDFRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate a new filename from PDF metadata.
 
         Args:

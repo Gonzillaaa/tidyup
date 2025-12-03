@@ -5,11 +5,9 @@ Detects archives that contain books (e.g., ZIP files with EPUB/PDF).
 
 import re
 import zipfile
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH, CONFIDENCE_MEDIUM
-
+from .base import CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, BaseDetector
 
 # Book file extensions to look for inside archives
 BOOK_EXTENSIONS = {".epub", ".mobi", ".azw", ".azw3", ".pdf", ".fb2", ".djvu"}
@@ -62,7 +60,7 @@ class ArchiveBookDetector(BaseDetector):
     def name(self) -> str:
         return "ArchiveBookDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if archive contains books.
 
         Args:
@@ -88,7 +86,7 @@ class ArchiveBookDetector(BaseDetector):
 
         return None
 
-    def _inspect_zip(self, file: FileInfo) -> Optional[DetectionResult]:
+    def _inspect_zip(self, file: FileInfo) -> DetectionResult | None:
         """Inspect ZIP archive contents for book files."""
         try:
             with zipfile.ZipFile(file.path, "r") as zf:
@@ -122,7 +120,7 @@ class ArchiveBookDetector(BaseDetector):
 
         return None
 
-    def _analyze_filename(self, file: FileInfo) -> Optional[DetectionResult]:
+    def _analyze_filename(self, file: FileInfo) -> DetectionResult | None:
         """Analyze filename for book-related keywords."""
         # Get stem without extension
         stem = file.path.stem.lower()

@@ -5,11 +5,9 @@ Standardizes screenshot filenames with consistent date/time format.
 
 import re
 from datetime import datetime
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo, RenameResult
 from .base import BaseRenamer, format_datetime
-
 
 # Patterns to extract date/time from screenshot filenames
 SCREENSHOT_DATE_PATTERNS = [
@@ -78,7 +76,7 @@ def _parse_macos_datetime(match: re.Match) -> datetime:
     return datetime(year, month, day, hour, minute, second)
 
 
-def extract_screenshot_datetime(filename: str) -> Optional[datetime]:
+def extract_screenshot_datetime(filename: str) -> datetime | None:
     """Extract datetime from screenshot filename.
 
     Args:
@@ -118,7 +116,7 @@ class ScreenshotRenamer(BaseRenamer):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate standardized screenshot filename.
 
         Args:

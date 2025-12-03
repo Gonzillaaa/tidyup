@@ -5,7 +5,6 @@ This module provides the abstract base class for all renamers.
 
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo, RenameResult
 
@@ -55,7 +54,7 @@ class BaseRenamer(ABC):
         self,
         file: FileInfo,
         detection: DetectionResult,
-    ) -> Optional[RenameResult]:
+    ) -> RenameResult | None:
         """Generate a new filename for a file.
 
         Args:

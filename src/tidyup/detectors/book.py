@@ -4,12 +4,10 @@ Detects book files by content analysis (PDFs) and file extensions.
 """
 
 import re
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH, CONFIDENCE_MEDIUM
+from .base import CONFIDENCE_HIGH, CONFIDENCE_MEDIUM, BaseDetector
 from .content import extract_pdf_text_cached
-
 
 # Book file extensions (handled by GenericDetector, but we boost priority for PDFs)
 EBOOK_EXTENSIONS = {"epub", "mobi", "azw", "azw3", "fb2"}
@@ -57,7 +55,7 @@ class BookDetector(BaseDetector):
     def name(self) -> str:
         return "BookDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if file is a book.
 
         Args:

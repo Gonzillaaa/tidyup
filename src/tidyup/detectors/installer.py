@@ -3,11 +3,9 @@
 Detects installer and application files by extension.
 """
 
-from typing import Optional
 
 from ..models import DetectionResult, FileInfo
-from .base import BaseDetector, CONFIDENCE_HIGH
-
+from .base import CONFIDENCE_HIGH, BaseDetector
 
 # Installer extensions by platform
 INSTALLER_EXTENSIONS = {
@@ -41,7 +39,7 @@ class InstallerDetector(BaseDetector):
     def name(self) -> str:
         return "InstallerDetector"
 
-    def detect(self, file: FileInfo) -> Optional[DetectionResult]:
+    def detect(self, file: FileInfo) -> DetectionResult | None:
         """Detect if file is an installer.
 
         Args:

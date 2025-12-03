@@ -1,8 +1,8 @@
 """Command-line interface for TidyUp."""
 
-import click
 from pathlib import Path
-from typing import Optional
+
+import click
 
 from . import __version__
 
@@ -52,13 +52,13 @@ def main(ctx: click.Context) -> None:
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
 def run_command(
     source: Path,
-    destination: Optional[Path],
+    destination: Path | None,
     move: bool,
     rename: bool,
     skip: bool,
     dry_run: bool,
     interactive: bool,
-    limit: Optional[int],
+    limit: int | None,
     verbose: bool,
 ) -> None:
     """Organize files from SOURCE to DESTINATION.
@@ -79,7 +79,7 @@ def run_command(
     run_organize(source, destination, options)
 
 
-def run_organize(source: Path, destination: Optional[Path], options: dict) -> None:
+def run_organize(source: Path, destination: Path | None, options: dict) -> None:
     """Execute the organize operation."""
     from rich.console import Console
     from rich.table import Table
@@ -242,7 +242,7 @@ def categories_list() -> None:
 @categories.command(name="add")
 @click.argument("name")
 @click.option("--position", "-p", type=int, help="Position for the new category (1-based)")
-def categories_add(name: str, position: Optional[int]) -> None:
+def categories_add(name: str, position: int | None) -> None:
     """Add a new category."""
     from rich.console import Console
 

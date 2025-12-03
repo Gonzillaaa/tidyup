@@ -7,7 +7,6 @@ for auditing and status reporting.
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 from .models import Action, RunResult, RunSummary
 
@@ -144,7 +143,7 @@ def load_log(path: Path) -> RunResult:
         FileNotFoundError: If log file doesn't exist.
         json.JSONDecodeError: If log file is invalid JSON.
     """
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
     # Parse the summary
@@ -173,7 +172,7 @@ def load_log(path: Path) -> RunResult:
     )
 
 
-def list_logs(limit: Optional[int] = None) -> list[Path]:
+def list_logs(limit: int | None = None) -> list[Path]:
     """List log files sorted by date descending (newest first).
 
     Args:

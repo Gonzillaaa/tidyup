@@ -6,7 +6,6 @@ All operations are designed to never lose data.
 
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from .utils import compute_file_hash, generate_unique_path
 
@@ -111,7 +110,7 @@ def ensure_dest_structure(dest: Path, folders: list[dict]) -> None:
         folder_path.mkdir(exist_ok=True)
 
 
-def is_duplicate(file: Path, dest_folder: Path) -> Optional[Path]:
+def is_duplicate(file: Path, dest_folder: Path) -> Path | None:
     """Check if file is a duplicate of an existing file in destination.
 
     Compares file hashes to detect exact duplicates.

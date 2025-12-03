@@ -3,8 +3,6 @@
 This module provides the detector registry and imports all detectors.
 """
 
-from typing import Optional
-
 from ..models import DetectionResult, FileInfo
 from .base import (
     CONFIDENCE_HIGH,
@@ -74,7 +72,7 @@ class DetectorRegistry:
 
 
 # Global registry instance
-_registry: Optional[DetectorRegistry] = None
+_registry: DetectorRegistry | None = None
 
 
 def get_registry() -> DetectorRegistry:
@@ -89,14 +87,14 @@ def get_registry() -> DetectorRegistry:
 def _register_default_detectors(registry: DetectorRegistry) -> None:
     """Register all default detectors."""
     # Import here to avoid circular imports
-    from .generic import GenericDetector
-    from .screenshot import ScreenshotDetector
-    from .arxiv import ArxivDetector
-    from .invoice import InvoiceDetector
-    from .book import BookDetector
-    from .installer import InstallerDetector
-    from .paper import PaperDetector
     from .archive_book import ArchiveBookDetector
+    from .arxiv import ArxivDetector
+    from .book import BookDetector
+    from .generic import GenericDetector
+    from .installer import InstallerDetector
+    from .invoice import InvoiceDetector
+    from .paper import PaperDetector
+    from .screenshot import ScreenshotDetector
 
     # Register in priority order (more specific first)
     registry.register(ScreenshotDetector())  # priority=10

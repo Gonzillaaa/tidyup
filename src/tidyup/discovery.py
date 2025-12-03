@@ -5,12 +5,11 @@ filtering by patterns, hidden files, and recency.
 """
 
 import fnmatch
+from collections.abc import Iterator
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterator, Optional
 
 from .models import FileInfo
-
 
 # Default patterns to always skip
 DEFAULT_SKIP_PATTERNS = [
@@ -65,10 +64,10 @@ def should_skip_recent(
 
 def discover_files(
     source: Path,
-    skip_patterns: Optional[list[str]] = None,
+    skip_patterns: list[str] | None = None,
     skip_hidden: bool = True,
     skip_recent_hours: int = 0,
-    limit: Optional[int] = None,
+    limit: int | None = None,
 ) -> Iterator[FileInfo]:
     """Discover files to process in source directory.
 
