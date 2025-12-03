@@ -367,6 +367,10 @@ def routing_list() -> None:
         console.print("Add a rule with:")
         console.print("  tidyup routing set <from> <to>")
         console.print("  tidyup routing set <from> <to> --detector <name>")
+        console.print()
+        console.print("[dim]Example: Route invoices to a custom Invoices folder:[/dim]")
+        console.print("  tidyup categories add Invoices")
+        console.print("  tidyup routing set Documents Invoices --detector InvoiceDetector")
         return
 
     table = Table(title="Routing Rules")

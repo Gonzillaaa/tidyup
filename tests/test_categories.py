@@ -257,6 +257,40 @@ class TestCategoryManagerAdd:
         with pytest.raises(ValueError, match="Position must be"):
             manager.add("Bar", position=10)
 
+    def test_add_normalizes_name_lowercase(self, tmp_path: Path) -> None:
+        """Normalizes lowercase input to Title Case."""
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text("categories:\n  - Foo\n")
+
+        manager = CategoryManager(config_path=config_path)
+        manager.load()
+        cat = manager.add("invoices")
+
+        assert cat.name == "Invoices"
+        assert cat.folder_name == "02_Invoices"
+
+    def test_add_normalizes_name_uppercase(self, tmp_path: Path) -> None:
+        """Normalizes uppercase input to Title Case."""
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text("categories:\n  - Foo\n")
+
+        manager = CategoryManager(config_path=config_path)
+        manager.load()
+        cat = manager.add("PDF")
+
+        assert cat.name == "Pdf"
+
+    def test_add_normalizes_name_mixed(self, tmp_path: Path) -> None:
+        """Normalizes mixed case input to Title Case."""
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text("categories:\n  - Foo\n")
+
+        manager = CategoryManager(config_path=config_path)
+        manager.load()
+        cat = manager.add("myCategory")
+
+        assert cat.name == "Mycategory"
+
 
 class TestCategoryManagerRemove:
     """Tests for removing categories."""
@@ -300,6 +334,36 @@ class TestCategoryManagerRemove:
 
         with pytest.raises(ValueError, match="not found"):
             manager.remove("NonExistent")
+
+    def test_remove_case_insensitive(self, tmp_path: Path) -> None:
+        """Removes category regardless of case in user input."""
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text("categories:\n  - Invoices\n  - Documents\n")
+
+        manager = CategoryManager(config_path=config_path)
+        manager.load()
+
+        # Remove with different case than stored
+        manager.remove("invoices")  # lowercase, stored as "Invoices"
+
+        names = [c.name for c in manager.categories if c.name != "Unsorted"]
+        assert "Invoices" not in names
+        assert names == ["Documents"]
+
+    def test_remove_case_insensitive_uppercase(self, tmp_path: Path) -> None:
+        """Removes category when user provides uppercase variant."""
+        config_path = tmp_path / "config.yaml"
+        config_path.write_text("categories:\n  - invoices\n  - Documents\n")
+
+        manager = CategoryManager(config_path=config_path)
+        manager.load()
+
+        # Remove with uppercase when stored as lowercase
+        manager.remove("INVOICES")
+
+        names = [c.name for c in manager.categories if c.name != "Unsorted"]
+        assert "invoices" not in names
+        assert names == ["Documents"]
 
 
 class TestCategoryManagerReorder:

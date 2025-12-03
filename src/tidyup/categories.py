@@ -10,6 +10,23 @@ from typing import Any
 
 import yaml
 
+def normalize_category_name(name: str) -> str:
+    """Normalize a category name to Title Case.
+
+    Ensures consistent naming: "invoices" -> "Invoices", "PDF" -> "Pdf".
+
+    Args:
+        name: Raw category name from user input.
+
+    Returns:
+        Normalized name with first letter capitalized, rest lowercase.
+    """
+    name = name.strip()
+    if not name:
+        return name
+    return name[0].upper() + name[1:].lower() if len(name) > 1 else name.upper()
+
+
 # Default categories in order (position determines number)
 DEFAULT_CATEGORIES = [
     "Documents",
@@ -347,7 +364,7 @@ class CategoryManager:
         """Add a new category at the specified position.
 
         Args:
-            name: Name of the new category.
+            name: Name of the new category (will be normalized to Title Case).
             position: Position (1-based). None means append at end.
 
         Returns:
@@ -356,6 +373,9 @@ class CategoryManager:
         Raises:
             ValueError: If category already exists or position invalid.
         """
+        # Normalize the name for consistency
+        name = normalize_category_name(name)
+
         # Check for duplicates
         if self.get_by_name(name) is not None:
             raise ValueError(f"Category already exists: {name}")
@@ -389,7 +409,7 @@ class CategoryManager:
         """Remove a category.
 
         Args:
-            name: Name of the category to remove.
+            name: Name of the category to remove (case-insensitive).
 
         Raises:
             ValueError: If category not found or is Unsorted.
@@ -401,10 +421,13 @@ class CategoryManager:
         if cat is None:
             raise ValueError(f"Category not found: {name}")
 
+        # Use the actual category name from lookup (handles case differences)
+        actual_name = cat.name
+
         # Filter out the category and Unsorted
         regular_cats = [
             c for c in self.categories
-            if c.name != name and c.name != UNSORTED_CATEGORY
+            if c.name != actual_name and c.name != UNSORTED_CATEGORY
         ]
 
         # Renumber remaining categories
