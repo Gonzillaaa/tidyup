@@ -403,3 +403,4 @@ class TestGlobalRegistry:
         assert "ScreenshotDetector" in names
         assert "ArxivDetector" in names
         assert "InvoiceDetector" in names
+        assert "BookDetector" in names
