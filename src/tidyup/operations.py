@@ -175,5 +175,6 @@ DEFAULT_FOLDERS = [
     {"number": 6, "name": "Code"},
     {"number": 7, "name": "Books"},
     {"number": 8, "name": "Data"},
+    {"number": 9, "name": "Installers"},
     {"number": 99, "name": "Unsorted"},
 ]
