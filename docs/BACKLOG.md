@@ -420,43 +420,64 @@ This document tracks all implementation tasks with story points, dependencies, a
 
 ---
 
-## Phase 5: Safety & Polish 🔲 Partial
+## Phase 5: Safety & Polish ✅ Complete
 
-### 5.1 Dry Run Mode
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 5.1.1-6 | DryRunFormatter, pagination, color coding | 13 | Partial (basic table done) |
-
-### 5.2 Interactive Mode
+### 5.1 Dry Run Mode ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 5.2.1-6 | Interactive prompts for uncertain files | 14 | Todo |
+| 5.1.1-6 | DryRunFormatter, pagination, color coding | 13 | ✅ Done |
+
+**Features:**
+- Category-specific colors in dry-run table
+- Pagination via `--limit` flag
+- Summary statistics at end
+
+### 5.2 Interactive Mode ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 5.2.1-6 | Interactive prompts for uncertain files | 14 | ✅ Done |
+
+**Features:**
+- `--interactive` flag prompts for uncertain files (confidence < 0.7)
+- Options: Accept (Y), Skip (n), Skip type (s), Change category (c)
+- Session-level skip tracking for file extensions
 
 ### 5.3 Configuration
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 5.3.1-8 | Config loading, validation, defaults | 16 | Todo |
+| 5.3.1-8 | Config loading, validation, defaults | 16 | Deferred (basic config via categories) |
 
-### 5.4 Rich Output
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 5.4.1-5 | Progress bar, colors, tables | 9 | Partial (basic Rich output) |
-
-### 5.5 Status Command
+### 5.4 Rich Output ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 5.5.1-7 | Full status implementation | 13 | Todo (stub exists) |
+| 5.4.1-5 | Progress bar, colors, tables | 9 | ✅ Done |
+
+**Features:**
+- Progress bar with spinner during processing
+- Category colors in output table
+- Status color coding (success/error/skipped)
+
+### 5.5 Status Command ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 5.5.1-7 | Full status implementation | 13 | ✅ Done |
+
+**Output includes:**
+- Destination folder statistics (file counts, sizes)
+- Config and log file locations
+- Last run info from logs
+- Recent activity summary (7 days)
 
 ### 5.6 Reindex Command
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 5.6.1-10 | Folder reindexing | 20 | Todo (stub exists) |
+| 5.6.1-10 | Folder reindexing | 20 | Skipped (not needed with `categories add/remove`) |
 
 ---
 
@@ -501,7 +522,7 @@ This document tracks all implementation tasks with story points, dependencies, a
 | 3. Detectors | ✅ Complete | 71 |
 | 4. Renamers | ✅ Complete | 22 |
 | 4.5 Content-Based Enhancements | ✅ Complete | 80 |
-| 5. Safety & Polish | 🟡 Partial | - |
+| 5. Safety & Polish | ✅ Complete | - |
 | 6. Quality & Release | 🟡 Partial | - |
 | **Total** | | **323 tests** |
 
