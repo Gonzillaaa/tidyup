@@ -55,6 +55,37 @@ tidyup <source> [destination]
 | `tidyup routing set <from> <to> -d <detector>` | Add a detector-specific routing rule |
 | `tidyup routing remove <from>` | Remove a routing rule |
 
+## Quick Start: Customizing Your Organization
+
+TidyUp works great out of the box, but you can customize it to match your workflow. Here's a quick overview of your options:
+
+| I want to... | Use | Example |
+|--------------|-----|---------|
+| Put all invoices in their own folder | **Routing** | `tidyup routing set Documents Invoices -d InvoiceDetector` |
+| Separate tech books from fiction | **Rules** | `tidyup categories add Technical --parent Books --keywords "code,programming"` |
+| Create a new category quickly | **Suggestions** | `tidyup categories add "Work Projects"` (auto-suggests keywords) |
+| Rename "Documents" to "Paperwork" | **Routing** | `tidyup routing set Documents Paperwork` |
+
+**Typical workflow:**
+
+```bash
+# 1. Create your custom category
+tidyup categories add Invoices
+
+# 2. Tell TidyUp which files should go there
+tidyup routing set Documents Invoices --detector InvoiceDetector
+
+# 3. Test it
+tidyup ~/Downloads --dry-run
+
+# 4. Run it for real
+tidyup ~/Downloads
+```
+
+See the sections below for detailed examples of each feature.
+
+---
+
 ## Category Management
 
 Categories determine the folder structure where files are organized. Each category gets a numbered folder (01, 02, 03...) based on its position in the config.
@@ -96,7 +127,13 @@ tidyup categories add Music --position 5
 
 ### Smart Suggestions
 
-When you add a category without explicit rules, TidyUp automatically suggests keywords and parent categories based on the name:
+When you add a category, TidyUp analyzes the name and automatically suggests:
+- **Parent category**: Which existing category this should be a subcategory of
+- **Keywords**: Words to match files against
+
+This saves you from manually figuring out which keywords to use.
+
+**Example:**
 
 ```bash
 $ tidyup categories add "Technical Books"
@@ -108,21 +145,55 @@ Suggestions based on category name:
 Accept these suggestions? [Y/n]
 ```
 
-Press Enter to accept, or `n` to add without rules.
+- Press **Enter** to accept (recommended)
+- Type **n** to add without any rules
+- Or use `--keywords` to provide your own instead
 
-**Supported patterns include:**
-- **Tech**: programming, software, code, developer, api
-- **Finance**: invoice, receipt, bill, payment, tax
-- **Books**: fiction, nonfiction, novel, textbook, manual
-- **Work**: project, client, meeting, report, presentation
-- **Academic**: paper, research, thesis, journal, study
-- **Media**: photo, video, music, podcast
-- And many more (~100 patterns)
+### How Suggestions Work
 
-To skip suggestions entirely:
+TidyUp has a built-in dictionary of ~100 patterns. When your category name contains a known pattern, it suggests relevant keywords:
+
+| Your category name contains... | Suggested keywords |
+|-------------------------------|-------------------|
+| "tech", "programming", "code" | programming, software, developer, api, framework |
+| "invoice", "receipt", "bill" | invoice, receipt, payment, amount, total |
+| "fiction", "novel" | novel, story, fantasy, romance, mystery |
+| "work", "project", "client" | project, meeting, client, report, presentation |
+| "research", "paper", "academic" | paper, research, study, journal, thesis |
+| "photo", "image" | photo, image, picture, camera, shot |
+
+TidyUp also infers parent categories:
+
+| Your category name contains... | Suggested parent |
+|-------------------------------|-----------------|
+| "fiction", "novel", "textbook" | Books |
+| "invoice", "receipt", "contract" | Documents |
+| "photo", "picture", "graphic" | Images |
+| "research", "thesis", "paper" | Papers |
+
+### When to Use Suggestions
+
+**Good for:**
+- Common category types (invoices, tech books, work projects)
+- Quick setup without thinking about keywords
+- Getting a reasonable starting point to customize later
+
+**Skip suggestions when:**
+- You have very specific keyword requirements
+- The category name doesn't match common patterns
+- You want complete control over matching
+
+### Skipping or Customizing Suggestions
 
 ```bash
-tidyup categories add "Random Category" --no-suggestions
+# Skip suggestions entirely
+tidyup categories add "My Category" --no-suggestions
+
+# Provide your own keywords instead
+tidyup categories add "My Category" --keywords "custom,keywords,here"
+
+# Override parent suggestion
+tidyup categories add "My Category" --parent Documents --keywords "my,keywords"
 ```
 
 ### Removing a Category
@@ -158,71 +229,133 @@ categories:
 
 ## Category Routing
 
-Routing allows you to redirect files from one category to another. This is useful when:
-- You want to rename a default category (e.g., "Documents" → "Paperwork")
-- You want certain file types to go to a custom category
-- You want invoices to go to an "Invoices" folder instead of "Documents"
+Routing redirects files from one category to another **after** TidyUp detects what type of file it is. Think of it as: "When TidyUp says this file is X, actually put it in Y."
 
-### Viewing Routing Rules
+### Why Use Routing?
+
+**Problem**: TidyUp's detectors output hardcoded category names. The `InvoiceDetector` always outputs "Documents", the `BookDetector` always outputs "Books", etc.
+
+**Solution**: Routing lets you intercept these outputs and redirect them wherever you want.
+
+### Common Use Cases
+
+| Scenario | Before Routing | After Routing |
+|----------|---------------|---------------|
+| Separate invoices from other PDFs | All invoices → `01_Documents` | Invoices → `12_Invoices` |
+| Rename a category | "Documents" folder | "Paperwork" folder |
+| Consolidate categories | Books + Papers separate | Both → "Reading" folder |
+
+### How It Works
+
+```
+File: invoice_acme.pdf
+        ↓
+┌─────────────────────────────────┐
+│ 1. InvoiceDetector analyzes it  │
+│    → "This is an invoice"       │
+│    → Returns: category=Documents│
+└─────────────────────────────────┘
+        ↓
+┌─────────────────────────────────┐
+│ 2. Routing layer checks config  │
+│    → "InvoiceDetector:Documents │
+│        should go to Invoices"   │
+│    → Changes to: Invoices       │
+└─────────────────────────────────┘
+        ↓
+    File goes to: 12_Invoices/
+```
+
+### Setting Up Routing
+
+**Step 1: View current rules**
 
 ```bash
 tidyup routing
 ```
 
-Shows all configured routing rules.
-
-### Setting a Global Remap
-
-Redirect ALL files from one category to another:
+**Step 2: Add a routing rule**
 
 ```bash
-# All files detected as "Documents" now go to "PDF" folder
-tidyup routing set Documents PDF
-```
+# Global: redirect ALL "Documents" to "Paperwork"
+tidyup routing set Documents Paperwork
 
-### Setting a Detector-Specific Remap
-
-Redirect only files from a specific detector:
-
-```bash
-# Only files detected as invoices go to "Invoices" folder
+# Detector-specific: only invoices go to "Invoices"
 tidyup routing set Documents Invoices --detector InvoiceDetector
 ```
 
-**Available detectors:**
-- `ScreenshotDetector` - Screenshots
-- `ArxivDetector` - arXiv papers
-- `PaperDetector` - Academic PDFs with DOI
-- `InvoiceDetector` - Invoices and receipts
-- `InstallerDetector` - App installers
-- `ArchiveBookDetector` - Books in archives
-- `BookDetector` - E-books (EPUB, MOBI)
-- `GenericDetector` - Fallback extension-based detection
-
-### Removing a Routing Rule
+**Step 3: Test it**
 
 ```bash
-# Remove global remap
+tidyup ~/Downloads --dry-run --verbose
+```
+
+### Real-World Examples
+
+#### Example 1: Invoices to Their Own Folder
+
+```bash
+# Create the target category
+tidyup categories add Invoices
+
+# Route only invoice detections (not all documents)
+tidyup routing set Documents Invoices --detector InvoiceDetector
+
+# Result:
+# - invoice_amazon.pdf     → 12_Invoices/  (detected as invoice)
+# - quarterly_report.pdf   → 01_Documents/ (regular document)
+```
+
+#### Example 2: Rename "Documents" to "Paperwork"
+
+```bash
+# Create the new category name
+tidyup categories add Paperwork --position 1
+
+# Redirect everything
+tidyup routing set Documents Paperwork
+
+# Remove the old category (optional)
+tidyup categories remove Documents
+```
+
+#### Example 3: All Academic Content Together
+
+```bash
+# Create a unified category
+tidyup categories add Reading
+
+# Route both books and papers there
+tidyup routing set Books Reading
+tidyup routing set Papers Reading
+```
+
+### Available Detectors
+
+When using `--detector`, these are the detector names:
+
+| Detector | Detects | Default Output |
+|----------|---------|----------------|
+| `ScreenshotDetector` | macOS/Windows screenshots | Screenshots |
+| `ArxivDetector` | arXiv papers (2401.12345.pdf) | Papers |
+| `PaperDetector` | PDFs with DOI | Papers |
+| `InvoiceDetector` | Invoices and receipts | Documents |
+| `InstallerDetector` | DMG, PKG, EXE, MSI | Installers |
+| `ArchiveBookDetector` | EPUB/MOBI in ZIP files | Books |
+| `BookDetector` | EPUB, MOBI, PDFs with ISBN | Books |
+| `GenericDetector` | Extension-based fallback | (varies) |
+
+### Removing Routing Rules
+
+```bash
+# Remove a global remap
 tidyup routing remove Documents
 
-# Remove detector-specific remap
+# Remove a detector-specific remap
 tidyup routing remove Documents --detector InvoiceDetector
 ```
 
-### Example: Custom Invoices Folder
-
-```bash
-# 1. Create the Invoices category
-tidyup categories add Invoices
-
-# 2. Route invoice detections to it
-tidyup routing set Documents Invoices --detector InvoiceDetector
-
-# 3. Now invoices go to your new Invoices folder!
-tidyup ~/Downloads --dry-run
-```
-
-### Routing Configuration
+### Configuration File
 
 Routing rules are saved in `~/.tidy/config.yaml`:
 
@@ -238,64 +371,127 @@ routing:
     InvoiceDetector:
       Documents: Invoices
 
-    # Global: all "Books" → "Library" (if you had this)
-    # Books: Library
+    # Global: all "Books" → "Library"
+    Books: Library
 ```
 
 ## Category Rules (Subcategorization)
 
-Rules allow you to create subcategories that automatically match files based on keywords and filename patterns. This is useful for:
-- Splitting "Books" into "Technical Books" vs "Fiction"
-- Routing client projects to specific folders
-- Creating custom categories that auto-populate
+Rules let you split a category into subcategories based on file content. Unlike Routing (which redirects detector output), Rules analyze the **file itself** to decide which subcategory it belongs to.
 
-### Adding a Category with Rules
+### When to Use Rules vs Routing
 
-```bash
-# Subcategory of Books that matches programming-related content
-tidyup categories add "Technical Books" --parent Books --keywords "programming,software,code,algorithm"
-
-# Category that matches filename patterns
-tidyup categories add "Client Work" --patterns "acme_*,techcorp_*"
-
-# Combine keywords and patterns
-tidyup categories add "Invoices" --parent Documents --keywords "invoice,receipt" --patterns "*_invoice_*"
-```
+| Feature | Rules | Routing |
+|---------|-------|---------|
+| **Purpose** | Split categories (Books → Technical/Fiction) | Redirect categories (Documents → Invoices) |
+| **Based on** | File content, filename patterns | Detector output |
+| **Use case** | "I want programming books separate from novels" | "I want invoices in their own folder" |
 
 ### How Rules Work
 
-When TidyUp detects a file:
-1. First, it runs detectors to determine the base category (e.g., "Books")
-2. Then, it checks if any subcategories have rules that match
-3. If a rule matches, the file goes to the subcategory instead
-
-Rules can match:
-- **Keywords**: Words in the filename or file content (case-insensitive)
-- **Patterns**: Glob patterns for filename matching (e.g., `acme_*`, `*_report_*`)
-- **Extensions**: File extensions (without dot)
-
-### Example: Technical vs Fiction Books
-
-```bash
-# Create subcategories under Books
-tidyup categories add "Technical" --parent Books --keywords "programming,software,code,algorithm,database"
-tidyup categories add "Fiction" --parent Books --keywords "novel,fiction,fantasy,mystery,thriller"
-
-# Now when you organize:
-# - "Clean_Code_Robert_Martin.epub" → Technical (matches "code")
-# - "The_Great_Gatsby.epub" → Fiction (matches "novel")
-# - "random_book.epub" → Books (no rule matches, stays in parent)
+```
+File: Clean_Code_Robert_Martin.epub
+        ↓
+┌─────────────────────────────────────────────┐
+│ 1. BookDetector identifies it as a book     │
+│    → Returns: category=Books                │
+└─────────────────────────────────────────────┘
+        ↓
+┌─────────────────────────────────────────────┐
+│ 2. Rules engine checks subcategories        │
+│    → "Technical" has parent=Books           │
+│    → Keywords: programming, software, code  │
+│    → File contains "code"? YES              │
+│    → Match! Use "Technical" instead         │
+└─────────────────────────────────────────────┘
+        ↓
+    File goes to: 09_Technical/
 ```
 
-### Example: Client Projects
+### Rule Types
+
+Rules can match files using:
+
+| Type | Matches | Example |
+|------|---------|---------|
+| **Keywords** | Words in filename or content | `--keywords "invoice,receipt,payment"` |
+| **Patterns** | Glob patterns on filename | `--patterns "acme_*,*_report_*"` |
+| **Extensions** | File extensions (no dot) | `--extensions "py,js,ts"` |
+
+### Creating Categories with Rules
+
+**Basic subcategory:**
+```bash
+tidyup categories add "Technical" --parent Books --keywords "programming,software,code"
+```
+
+**Pattern-based category:**
+```bash
+tidyup categories add "Acme Projects" --patterns "acme_*,*_acme_*"
+```
+
+**Combined rules:**
+```bash
+tidyup categories add "Invoices" --parent Documents --keywords "invoice,receipt" --patterns "*_invoice_*"
+```
+
+### Real-World Examples
+
+#### Example 1: Organize Books by Genre
+
+**Goal**: Separate programming books from fiction
 
 ```bash
-# Match files by filename pattern
-tidyup categories add "Acme Projects" --patterns "acme_*,*_acme_*"
-tidyup categories add "TechCorp" --patterns "techcorp_*,tc_*"
+# Step 1: Create subcategories under Books
+tidyup categories add "Technical" --parent Books \
+    --keywords "programming,software,code,algorithm,database,api"
 
-# Files like "acme_q4_report.pdf" → Acme Projects
-# Files like "techcorp_invoice.pdf" → TechCorp
+tidyup categories add "Fiction" --parent Books \
+    --keywords "novel,fiction,fantasy,romance,mystery,thriller"
+
+# Step 2: Test with a dry run
+tidyup ~/Downloads --dry-run --verbose
+```
+
+**Result:**
+| File | Category | Why |
+|------|----------|-----|
+| `Clean_Code.epub` | Technical | Contains "code" |
+| `The_Great_Gatsby.epub` | Fiction | Contains "novel" in metadata |
+| `random_book.epub` | Books | No rules matched, stays in parent |
+
+#### Example 2: Client Project Folders
+
+**Goal**: Automatically sort files by client
+
+```bash
+# Create client-specific categories using filename patterns
+tidyup categories add "Acme Corp" --patterns "acme_*,*_acme_*,acme-*"
+tidyup categories add "TechCorp" --patterns "techcorp_*,tc_*,*_techcorp_*"
+tidyup categories add "Startup Inc" --patterns "startup_*,si_*"
+```
+
+**Result:**
+| File | Category | Why |
+|------|----------|-----|
+| `acme_q4_report.pdf` | Acme Corp | Matches `acme_*` pattern |
+| `tc_invoice_2024.pdf` | TechCorp | Matches `tc_*` pattern |
+| `random_report.pdf` | Documents | No pattern matched |
+
+#### Example 3: Work vs Personal Documents
+
+**Goal**: Split documents by context
+
+```bash
+# Work documents
+tidyup categories add "Work" --parent Documents \
+    --keywords "meeting,project,client,deadline,quarterly" \
+    --patterns "*_work_*,work_*"
+
+# Personal documents
+tidyup categories add "Personal" --parent Documents \
+    --keywords "family,vacation,medical,insurance,tax" \
+    --patterns "*_personal_*"
 ```
 
 ### Viewing Categories with Rules
@@ -304,19 +500,22 @@ tidyup categories add "TechCorp" --patterns "techcorp_*,tc_*"
 tidyup categories
 ```
 
-When categories have rules, the output shows parent and rule counts:
+Output shows parent relationships and rule counts:
 
 ```
 ┏━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
 ┃ # ┃ Name           ┃ Folder            ┃ Parent ┃ Rules    ┃
 ┡━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
+│ 1 │ Documents      │ 01_Documents      │        │          │
+│ 2 │ Work           │ 02_Work           │ Docs   │ kw:5 pt:2│
+│ 3 │ Personal       │ 03_Personal       │ Docs   │ kw:5 pt:1│
 │ 8 │ Books          │ 08_Books          │        │          │
-│ 9 │ Technical      │ 09_Technical      │ Books  │ kw: 5    │
-│10 │ Fiction        │ 10_Fiction        │ Books  │ kw: 5    │
+│ 9 │ Technical      │ 09_Technical      │ Books  │ kw: 6    │
+│10 │ Fiction        │ 10_Fiction        │ Books  │ kw: 6    │
 └───┴────────────────┴───────────────────┴────────┴──────────┘
 ```
 
-### Rules Configuration
+### Configuration File
 
 Rules are saved in `~/.tidy/config.yaml`:
 
@@ -324,6 +523,8 @@ Rules are saved in `~/.tidy/config.yaml`:
 categories:
   - Documents
   - Books
+
+  # Subcategory with keywords
   - name: Technical
     parent: Books
     rules:
@@ -331,26 +532,123 @@ categories:
         - programming
         - software
         - code
-  - name: Fiction
-    parent: Books
-    rules:
-      keywords:
-        - novel
-        - fiction
-  - name: Client Work
+
+  # Subcategory with patterns
+  - name: Acme Corp
     rules:
       patterns:
         - acme_*
-        - techcorp_*
+        - "*_acme_*"
+
+  # Combined rules
+  - name: Work
+    parent: Documents
+    rules:
+      keywords:
+        - meeting
+        - project
+      patterns:
+        - "*_work_*"
 ```
 
 ### Rule Matching Details
 
-- **Keyword matching**: At least 1 keyword must appear in filename or content (configurable with `min_keyword_matches`)
-- **Pattern matching**: Uses glob patterns (case-insensitive)
-- **Extension matching**: Matches file extension (without dot)
-- **Multiple rules**: First matching subcategory wins
-- **No match**: File stays in parent category
+- **Keywords**: Case-insensitive, searches filename and file content
+- **Patterns**: Glob patterns (e.g., `acme_*`, `*_report_*`), case-insensitive
+- **Extensions**: Match without the dot (e.g., `py` not `.py`)
+- **Multiple rules on same file**: First matching subcategory wins
+- **No match**: File stays in parent category (or base detection)
+
+## When to Use What: Routing vs Rules vs Suggestions
+
+### Decision Flowchart
+
+```
+Do you want to create a new category?
+├── YES → Use "tidyup categories add <name>"
+│         │
+│         └── Does TidyUp suggest good keywords?
+│             ├── YES → Accept suggestions (Smart Suggestions)
+│             └── NO  → Add your own with --keywords/--patterns (Rules)
+│
+└── NO, I want to redirect existing detections
+    │
+    └── Use "tidyup routing set" (Routing)
+```
+
+### Feature Comparison
+
+| Feature | Routing | Rules | Suggestions |
+|---------|---------|-------|-------------|
+| **What it does** | Redirects detector output | Matches file content | Auto-generates keywords |
+| **When it runs** | After detection | After detection + routing | When you add a category |
+| **Configuration** | `tidyup routing set` | `--keywords`, `--patterns` | Automatic or `--no-suggestions` |
+
+### Common Scenarios
+
+| I want to... | Solution |
+|--------------|----------|
+| Put invoices in their own folder | Routing: `tidyup routing set Documents Invoices -d InvoiceDetector` |
+| Rename "Documents" to "Paperwork" | Routing: `tidyup routing set Documents Paperwork` |
+| Separate tech books from fiction | Rules: `tidyup categories add Technical --parent Books --keywords "code"` |
+| Organize files by client name | Rules: `tidyup categories add "Acme" --patterns "acme_*"` |
+| Quickly add a common category | Suggestions: `tidyup categories add "Work Projects"` (auto-suggests) |
+
+### How They Work Together
+
+TidyUp processes files in this order:
+
+```
+File: acme_invoice_2024.pdf
+        ↓
+┌──────────────────────────────────────┐
+│ 1. DETECTION                         │
+│    InvoiceDetector → "Documents"     │
+└──────────────────────────────────────┘
+        ↓
+┌──────────────────────────────────────┐
+│ 2. RULES (subcategorization)         │
+│    Check if "Work" subcategory       │
+│    matches (has parent=Documents     │
+│    and keywords match)               │
+│    → No match, stays "Documents"     │
+└──────────────────────────────────────┘
+        ↓
+┌──────────────────────────────────────┐
+│ 3. ROUTING (redirection)             │
+│    Check routing config              │
+│    → InvoiceDetector:Documents       │
+│      maps to "Invoices"              │
+│    → Final: "Invoices"               │
+└──────────────────────────────────────┘
+        ↓
+    File goes to: 12_Invoices/
+```
+
+### Examples: Combining Features
+
+**Example 1: Client invoices in separate folders**
+
+```bash
+# Create client-specific invoice categories
+tidyup categories add "Acme Invoices" --patterns "acme_*invoice*,*acme*invoice*"
+tidyup categories add "TechCorp Invoices" --patterns "techcorp_*invoice*,tc_*invoice*"
+tidyup categories add "Other Invoices"
+
+# Route all uncategorized invoices to "Other Invoices"
+tidyup routing set Documents "Other Invoices" --detector InvoiceDetector
+```
+
+**Example 2: Organized book library**
+
+```bash
+# Use smart suggestions for common book types
+tidyup categories add "Technical Books"     # Suggests: programming, software, code
+tidyup categories add "Fiction"             # Suggests: novel, fantasy, romance
+tidyup categories add "Self Help"           # Suggests: motivation, habit, productivity
+
+# All suggestions create subcategories under Books
+```
 
 ## Rename Examples
 
