@@ -19,7 +19,7 @@ from .operations import (
     safe_move,
     safe_rename,
 )
-from .utils import format_date, is_ugly_filename, sanitize_filename
+from .renamers import get_renamer_registry
 
 
 class Engine:
@@ -89,6 +89,9 @@ class Engine:
     def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> Optional[RenameResult]:
         """Generate a new filename for a file.
 
+        Uses the renamer registry to find the appropriate renamer
+        based on the detection result.
+
         Args:
             file: FileInfo for the file.
             detection: DetectionResult from category detection.
@@ -96,32 +99,8 @@ class Engine:
         Returns:
             RenameResult if file should be renamed, None otherwise.
         """
-        stem = file.path.stem
-        ext = file.extension
-
-        # Check if filename is "ugly" (auto-generated)
-        if not is_ugly_filename(stem):
-            # Filename looks fine, don't rename
-            return None
-
-        # Generate new name based on date and sanitized name
-        date_str = format_date(file.modified)
-
-        # Try to extract something useful from the name
-        # For now, just use the date
-        new_stem = f"{date_str}_{sanitize_filename(stem)}"
-
-        new_name = f"{new_stem}.{ext}" if ext else new_stem
-
-        if new_name == file.name:
-            return None
-
-        return RenameResult(
-            original_name=file.name,
-            new_name=new_name,
-            renamer_name="DefaultRenamer",
-            date_extracted=file.modified.date(),
-        )
+        registry = get_renamer_registry()
+        return registry.rename(file, detection)
 
     def process_file(
         self,
