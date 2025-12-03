@@ -28,8 +28,8 @@ A command-line tool to organize, rename, and categorize files from your Download
 ### Using pip (from source)
 
 ```bash
-git clone https://github.com/yourusername/tidy.git
-cd tidy
+git clone https://github.com/yourusername/tidyup.git
+cd tidyup
 pip install -e .
 ```
 
@@ -338,8 +338,8 @@ cat ~/.tidy/logs/2024-12-02_143052.json | python -m json.tool
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/tidy.git
-cd tidy
+git clone https://github.com/yourusername/tidyup.git
+cd tidyup
 
 # Install in development mode
 pip install -e .
