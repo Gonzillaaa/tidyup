@@ -229,13 +229,31 @@ def categories_list() -> None:
     console = Console()
     manager = get_category_manager()
 
+    # Check if any categories have rules
+    has_rules = any(cat.parent or cat.rules for cat in manager.categories)
+
     table = Table(title="Categories")
     table.add_column("#", style="dim", justify="right")
     table.add_column("Name", style="cyan")
     table.add_column("Folder", style="green")
+    if has_rules:
+        table.add_column("Parent", style="yellow")
+        table.add_column("Rules", style="dim")
 
     for cat in manager.categories:
-        table.add_row(str(cat.number), cat.name, cat.folder_name)
+        if has_rules:
+            parent_display = cat.parent or ""
+            rules_display = ""
+            if cat.rules:
+                parts = []
+                if cat.rules.keywords:
+                    parts.append(f"kw: {len(cat.rules.keywords)}")
+                if cat.rules.patterns:
+                    parts.append(f"pat: {len(cat.rules.patterns)}")
+                rules_display = ", ".join(parts)
+            table.add_row(str(cat.number), cat.name, cat.folder_name, parent_display, rules_display)
+        else:
+            table.add_row(str(cat.number), cat.name, cat.folder_name)
 
     console.print(table)
     console.print()
@@ -245,19 +263,56 @@ def categories_list() -> None:
 @categories.command(name="add")
 @click.argument("name")
 @click.option("--position", "-p", type=int, help="Position for the new category (1-based)")
-def categories_add(name: str, position: int | None) -> None:
-    """Add a new category."""
+@click.option("--parent", help="Parent category for subcategorization (e.g., Books)")
+@click.option(
+    "--keywords", "-k",
+    help="Comma-separated keywords for rule matching (e.g., 'programming,software,code')",
+)
+@click.option(
+    "--patterns",
+    help="Comma-separated filename patterns (e.g., 'acme_*,*_project_*')",
+)
+def categories_add(
+    name: str,
+    position: int | None,
+    parent: str | None,
+    keywords: str | None,
+    patterns: str | None,
+) -> None:
+    """Add a new category.
+
+    \\b
+    Examples:
+        tidyup categories add Invoices
+        tidyup categories add "Technical Books" --parent Books --keywords "programming,software,code"
+        tidyup categories add "Client Work" --patterns "acme_*,techcorp_*"
+    """
     from rich.console import Console
 
     from .categories import get_category_manager
+    from .rules import CategoryRule
 
     console = Console()
     manager = get_category_manager()
 
+    # Build rules if any options provided
+    rules = None
+    if keywords or patterns:
+        kw_list = [k.strip() for k in keywords.split(",")] if keywords else []
+        pattern_list = [p.strip() for p in patterns.split(",")] if patterns else []
+        rules = CategoryRule(keywords=kw_list, patterns=pattern_list)
+
     try:
-        category = manager.add(name, position)
+        category = manager.add(name, position, parent=parent, rules=rules)
         manager.save()
         console.print(f"[green]Added category:[/green] {category.folder_name}")
+        if parent:
+            console.print(f"[dim]Parent: {parent}[/dim]")
+        if rules:
+            if rules.keywords:
+                console.print(f"[dim]Keywords: {', '.join(rules.keywords)}[/dim]")
+            if rules.patterns:
+                console.print(f"[dim]Patterns: {', '.join(rules.patterns)}[/dim]")
         console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")

@@ -100,6 +100,44 @@ class Engine:
         # Use the new method that applies routing rules
         return manager.get_folder_for_detection(category, detector_name)
 
+    def _resolve_category(
+        self,
+        file: FileInfo,
+        detection: DetectionResult,
+        content: str | None = None,
+    ) -> str:
+        """Resolve final category by evaluating rules and routing.
+
+        This method applies:
+        1. Rules-based subcategorization (if any rules match)
+        2. Routing remaps (global and detector-specific)
+
+        Args:
+            file: FileInfo for the file.
+            detection: DetectionResult from category detection.
+            content: Optional file content for keyword matching.
+
+        Returns:
+            Final category name after rules and routing applied.
+        """
+        manager = get_category_manager()
+        category = detection.category
+
+        # Step 1: Check for subcategory rules
+        subcategory = manager.evaluate_rules(
+            filename=file.name,
+            extension=file.extension,
+            parent_category=category,
+            content=content,
+        )
+        if subcategory:
+            category = subcategory
+
+        # Step 2: Apply routing remaps
+        category = manager.resolve_category(category, detection.detector_name)
+
+        return category
+
     def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> RenameResult | None:
         """Generate a new filename for a file.
 
@@ -160,15 +198,17 @@ class Engine:
             # Rename in place
             dest_path = file.path.parent / final_name
         else:
-            # Move to destination (resolve category name to folder name)
+            # Move to destination
+            # First resolve category with rules and routing
+            final_category = self._resolve_category(file, detection)
             # destination is guaranteed to be set if not rename_only (see __init__)
             assert self.destination is not None
-            folder_name = self._get_folder_name(detection.category, detection.detector_name)
+            folder_name = self._get_folder_name(final_category)
             dest_path = self.destination / folder_name / final_name
 
         # Step 6: Check for duplicates (only when moving)
         if not self.rename_only and self.destination:
-            folder_name = self._get_folder_name(detection.category, detection.detector_name)
+            # Use the already resolved folder_name from step 5
             dest_folder = self.destination / folder_name
             if dest_folder.exists():
                 existing = is_duplicate(file.path, dest_folder)

@@ -43,6 +43,9 @@ tidyup <source> [destination]
 | `tidyup categories` | List all configured categories |
 | `tidyup categories list` | Same as above |
 | `tidyup categories add <name>` | Add a new category |
+| `tidyup categories add <name> --parent <cat>` | Add as subcategory |
+| `tidyup categories add <name> --keywords "kw1,kw2"` | Add with keyword rules |
+| `tidyup categories add <name> --patterns "pat1,pat2"` | Add with pattern rules |
 | `tidyup categories remove <name>` | Remove a category |
 | `tidyup categories apply <path>` | Rename folders to match current config |
 | `tidyup routing` | List all routing rules |
@@ -206,6 +209,116 @@ routing:
     # Global: all "Books" → "Library" (if you had this)
     # Books: Library
 ```
+
+## Category Rules (Subcategorization)
+
+Rules allow you to create subcategories that automatically match files based on keywords and filename patterns. This is useful for:
+- Splitting "Books" into "Technical Books" vs "Fiction"
+- Routing client projects to specific folders
+- Creating custom categories that auto-populate
+
+### Adding a Category with Rules
+
+```bash
+# Subcategory of Books that matches programming-related content
+tidyup categories add "Technical Books" --parent Books --keywords "programming,software,code,algorithm"
+
+# Category that matches filename patterns
+tidyup categories add "Client Work" --patterns "acme_*,techcorp_*"
+
+# Combine keywords and patterns
+tidyup categories add "Invoices" --parent Documents --keywords "invoice,receipt" --patterns "*_invoice_*"
+```
+
+### How Rules Work
+
+When TidyUp detects a file:
+1. First, it runs detectors to determine the base category (e.g., "Books")
+2. Then, it checks if any subcategories have rules that match
+3. If a rule matches, the file goes to the subcategory instead
+
+Rules can match:
+- **Keywords**: Words in the filename or file content (case-insensitive)
+- **Patterns**: Glob patterns for filename matching (e.g., `acme_*`, `*_report_*`)
+- **Extensions**: File extensions (without dot)
+
+### Example: Technical vs Fiction Books
+
+```bash
+# Create subcategories under Books
+tidyup categories add "Technical" --parent Books --keywords "programming,software,code,algorithm,database"
+tidyup categories add "Fiction" --parent Books --keywords "novel,fiction,fantasy,mystery,thriller"
+
+# Now when you organize:
+# - "Clean_Code_Robert_Martin.epub" → Technical (matches "code")
+# - "The_Great_Gatsby.epub" → Fiction (matches "novel")
+# - "random_book.epub" → Books (no rule matches, stays in parent)
+```
+
+### Example: Client Projects
+
+```bash
+# Match files by filename pattern
+tidyup categories add "Acme Projects" --patterns "acme_*,*_acme_*"
+tidyup categories add "TechCorp" --patterns "techcorp_*,tc_*"
+
+# Files like "acme_q4_report.pdf" → Acme Projects
+# Files like "techcorp_invoice.pdf" → TechCorp
+```
+
+### Viewing Categories with Rules
+
+```bash
+tidyup categories
+```
+
+When categories have rules, the output shows parent and rule counts:
+
+```
+┏━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
+┃ # ┃ Name           ┃ Folder            ┃ Parent ┃ Rules    ┃
+┡━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
+│ 8 │ Books          │ 08_Books          │        │          │
+│ 9 │ Technical      │ 09_Technical      │ Books  │ kw: 5    │
+│10 │ Fiction        │ 10_Fiction        │ Books  │ kw: 5    │
+└───┴────────────────┴───────────────────┴────────┴──────────┘
+```
+
+### Rules Configuration
+
+Rules are saved in `~/.tidy/config.yaml`:
+
+```yaml
+categories:
+  - Documents
+  - Books
+  - name: Technical
+    parent: Books
+    rules:
+      keywords:
+        - programming
+        - software
+        - code
+  - name: Fiction
+    parent: Books
+    rules:
+      keywords:
+        - novel
+        - fiction
+  - name: Client Work
+    rules:
+      patterns:
+        - acme_*
+        - techcorp_*
+```
+
+### Rule Matching Details
+
+- **Keyword matching**: At least 1 keyword must appear in filename or content (configurable with `min_keyword_matches`)
+- **Pattern matching**: Uses glob patterns (case-insensitive)
+- **Extension matching**: Matches file extension (without dot)
+- **Multiple rules**: First matching subcategory wins
+- **No match**: File stays in parent category
 
 ## Rename Examples
 

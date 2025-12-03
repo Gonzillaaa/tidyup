@@ -4,11 +4,16 @@ Provides dynamic category configuration that can be stored in config
 and modified via CLI commands.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
+
+if TYPE_CHECKING:
+    from .rules import CategoryRule
 
 def normalize_category_name(name: str) -> str:
     """Normalize a category name to Title Case.
@@ -54,10 +59,14 @@ class Category:
     Attributes:
         number: The category number (01-98, or 99 for Unsorted).
         name: The display name of the category.
+        parent: Optional parent category name for subcategorization.
+        rules: Optional rules for matching files to this category.
     """
 
     number: int
     name: str
+    parent: str | None = None
+    rules: CategoryRule | None = None
 
     @property
     def folder_name(self) -> str:
@@ -213,7 +222,9 @@ class CategoryManager:
         If config file doesn't exist or has no categories section,
         uses DEFAULT_CATEGORIES.
         """
-        category_names = DEFAULT_CATEGORIES.copy()
+        from .rules import CategoryRule
+
+        category_data: list[dict[str, Any]] = []
         routing_config: dict[str, Any] = {}
 
         if self.config_path and self.config_path.exists():
@@ -222,13 +233,12 @@ class CategoryManager:
                     config = yaml.safe_load(f) or {}
 
                 if "categories" in config and config["categories"]:
-                    # Extract names from config (can be strings or dicts)
-                    category_names = []
+                    # Extract category data from config (can be strings or dicts)
                     for item in config["categories"]:
                         if isinstance(item, str):
-                            category_names.append(item)
+                            category_data.append({"name": item})
                         elif isinstance(item, dict) and "name" in item:
-                            category_names.append(item["name"])
+                            category_data.append(item)
 
                 # Load routing configuration
                 if "routing" in config and isinstance(config["routing"], dict):
@@ -237,13 +247,22 @@ class CategoryManager:
                         routing_config = remap
             except (yaml.YAMLError, OSError):
                 # Fall back to defaults on any error
-                category_names = DEFAULT_CATEGORIES.copy()
+                category_data = []
                 routing_config = {}
+
+        # Use defaults if no categories loaded
+        if not category_data:
+            category_data = [{"name": name} for name in DEFAULT_CATEGORIES]
 
         # Build categories with numbers
         self.categories = []
-        for i, name in enumerate(category_names, start=1):
-            self.categories.append(Category(number=i, name=name))
+        for i, data in enumerate(category_data, start=1):
+            name = data["name"]
+            parent = data.get("parent")
+            rules = None
+            if "rules" in data and isinstance(data["rules"], dict):
+                rules = CategoryRule.from_dict(data["rules"])
+            self.categories.append(Category(number=i, name=name, parent=parent, rules=rules))
 
         # Always add Unsorted at 99
         self.categories.append(Category(number=UNSORTED_NUMBER, name=UNSORTED_CATEGORY))
@@ -273,9 +292,21 @@ class CategoryManager:
                 config = {}
 
         # Update categories section (exclude Unsorted, it's implicit)
-        config["categories"] = [
-            cat.name for cat in self.categories if cat.name != UNSORTED_CATEGORY
-        ]
+        categories_config: list[str | dict[str, Any]] = []
+        for cat in self.categories:
+            if cat.name == UNSORTED_CATEGORY:
+                continue
+            # Use simple string if no parent/rules, dict otherwise
+            if cat.parent or cat.rules:
+                cat_data: dict[str, Any] = {"name": cat.name}
+                if cat.parent:
+                    cat_data["parent"] = cat.parent
+                if cat.rules:
+                    cat_data["rules"] = cat.rules.to_dict()
+                categories_config.append(cat_data)
+            else:
+                categories_config.append(cat.name)
+        config["categories"] = categories_config
 
         # Update routing section (only if there are remaps)
         if self.routing.remap:
@@ -360,18 +391,65 @@ class CategoryManager:
             # If resolved category doesn't exist, fall back to Unsorted
             return self.get_folder_name("Unsorted")
 
-    def add(self, name: str, position: int | None = None) -> Category:
+    def get_subcategories(self, parent_name: str) -> list[Category]:
+        """Get all subcategories of a parent category.
+
+        Args:
+            parent_name: Name of the parent category.
+
+        Returns:
+            List of categories that have this parent.
+        """
+        parent_lower = parent_name.lower()
+        return [
+            c for c in self.categories
+            if c.parent and c.parent.lower() == parent_lower
+        ]
+
+    def evaluate_rules(
+        self,
+        filename: str,
+        extension: str,
+        parent_category: str,
+        content: str | None = None,
+    ) -> str | None:
+        """Evaluate rules to find a matching subcategory.
+
+        Args:
+            filename: The filename to match against rules.
+            extension: File extension (without dot).
+            parent_category: The original category from detector.
+            content: Optional file content for keyword matching.
+
+        Returns:
+            Name of matching subcategory, or None if no match.
+        """
+        # Check subcategories of the parent
+        for cat in self.get_subcategories(parent_category):
+            if cat.rules and cat.rules.matches(filename, extension, content):
+                return cat.name
+        return None
+
+    def add(
+        self,
+        name: str,
+        position: int | None = None,
+        parent: str | None = None,
+        rules: CategoryRule | None = None,
+    ) -> Category:
         """Add a new category at the specified position.
 
         Args:
             name: Name of the new category (will be normalized to Title Case).
             position: Position (1-based). None means append at end.
+            parent: Optional parent category name for subcategorization.
+            rules: Optional rules for matching files to this category.
 
         Returns:
             The newly created Category.
 
         Raises:
-            ValueError: If category already exists or position invalid.
+            ValueError: If category already exists, position invalid, or parent not found.
         """
         # Normalize the name for consistency
         name = normalize_category_name(name)
@@ -379,6 +457,12 @@ class CategoryManager:
         # Check for duplicates
         if self.get_by_name(name) is not None:
             raise ValueError(f"Category already exists: {name}")
+
+        # Validate parent exists if specified
+        if parent:
+            parent = normalize_category_name(parent)
+            if self.get_by_name(parent) is None:
+                raise ValueError(f"Parent category not found: {parent}")
 
         # Filter out Unsorted for positioning
         regular_cats = [c for c in self.categories if c.name != UNSORTED_CATEGORY]
@@ -392,13 +476,15 @@ class CategoryManager:
             )
 
         # Insert at position (convert to 0-based index)
-        new_cat = Category(number=position, name=name)
+        new_cat = Category(number=position, name=name, parent=parent, rules=rules)
         regular_cats.insert(position - 1, new_cat)
 
-        # Renumber all categories
+        # Renumber all categories, preserving parent and rules
         self.categories = []
         for i, cat in enumerate(regular_cats, start=1):
-            self.categories.append(Category(number=i, name=cat.name))
+            self.categories.append(
+                Category(number=i, name=cat.name, parent=cat.parent, rules=cat.rules)
+            )
 
         # Add back Unsorted
         self.categories.append(Category(number=UNSORTED_NUMBER, name=UNSORTED_CATEGORY))
@@ -430,10 +516,12 @@ class CategoryManager:
             if c.name != actual_name and c.name != UNSORTED_CATEGORY
         ]
 
-        # Renumber remaining categories
+        # Renumber remaining categories, preserving parent and rules
         self.categories = []
         for i, cat in enumerate(regular_cats, start=1):
-            self.categories.append(Category(number=i, name=cat.name))
+            self.categories.append(
+                Category(number=i, name=cat.name, parent=cat.parent, rules=cat.rules)
+            )
 
         # Add back Unsorted
         self.categories.append(Category(number=UNSORTED_NUMBER, name=UNSORTED_CATEGORY))
@@ -447,9 +535,9 @@ class CategoryManager:
         Raises:
             ValueError: If names don't match existing categories.
         """
-        # Get current regular categories
+        # Get current regular categories (map name_lower -> Category)
         regular_cats = {
-            c.name.lower(): c.name
+            c.name.lower(): c
             for c in self.categories
             if c.name != UNSORTED_CATEGORY
         }
@@ -462,16 +550,18 @@ class CategoryManager:
             extra = set(new_order_lower) - set(regular_cats.keys())
             msg = []
             if missing:
-                msg.append(f"Missing: {', '.join(regular_cats[m] for m in missing)}")
+                msg.append(f"Missing: {', '.join(regular_cats[m].name for m in missing)}")
             if extra:
                 msg.append(f"Unknown: {', '.join(extra)}")
             raise ValueError("; ".join(msg))
 
-        # Rebuild with new order
+        # Rebuild with new order, preserving parent and rules
         self.categories = []
         for i, name_lower in enumerate(new_order_lower, start=1):
-            original_name = regular_cats[name_lower]
-            self.categories.append(Category(number=i, name=original_name))
+            cat = regular_cats[name_lower]
+            self.categories.append(
+                Category(number=i, name=cat.name, parent=cat.parent, rules=cat.rules)
+            )
 
         # Add back Unsorted
         self.categories.append(Category(number=UNSORTED_NUMBER, name=UNSORTED_CATEGORY))
