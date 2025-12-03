@@ -138,7 +138,7 @@ def get_file_dates(path: Path) -> tuple[datetime, datetime]:
     # st_birthtime is macOS-specific, st_ctime is creation on Windows
     # but inode change time on Unix
     try:
-        created = datetime.fromtimestamp(stat.st_birthtime)  # type: ignore
+        created = datetime.fromtimestamp(stat.st_birthtime)
     except AttributeError:
         # Fall back to ctime (which is inode change time on Unix)
         created = datetime.fromtimestamp(stat.st_ctime)

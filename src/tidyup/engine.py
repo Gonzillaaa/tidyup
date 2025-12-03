@@ -163,6 +163,8 @@ class Engine:
             dest_path = file.path.parent / final_name
         else:
             # Move to destination (resolve category name to folder name)
+            # destination is guaranteed to be set if not rename_only (see __init__)
+            assert self.destination is not None
             folder_name = self._get_folder_name(detection.category)
             dest_path = self.destination / folder_name / final_name
 

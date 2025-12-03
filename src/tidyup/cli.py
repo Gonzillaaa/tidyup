@@ -314,7 +314,7 @@ def categories_apply(path: Path, dry_run: bool) -> None:
 
     for old_name, new_name in changes:
         status = "[dim]would rename[/dim]" if dry_run else "[green]renamed[/green]"
-        table.add_row(old_name, new_name, status)
+        table.add_row(str(old_name), str(new_name), status)
 
     console.print(table)
 
@@ -325,7 +325,7 @@ def categories_apply(path: Path, dry_run: bool) -> None:
 # Make 'tidyup categories' without subcommand show list
 @categories.result_callback()
 @click.pass_context
-def categories_default(ctx: click.Context, *args, **kwargs) -> None:
+def categories_default(ctx: click.Context, *args: object, **kwargs: object) -> None:
     """Show list when no subcommand is given."""
     if ctx.invoked_subcommand is None:
         ctx.invoke(categories_list)
