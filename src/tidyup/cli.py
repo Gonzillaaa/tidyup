@@ -145,8 +145,8 @@ def run_organize(source: Path, destination: Optional[Path], options: dict) -> No
                     "skipped": "dim",
                 }.get(action.status, "white")
 
-                # Show category folder + filename for destination
-                dest_display = f"{action.detection.category}/{action.dest_path.name}"
+                # Show actual destination: parent folder + filename
+                dest_display = f"{action.dest_path.parent.name}/{action.dest_path.name}"
 
                 table.add_row(
                     action.file.name,
