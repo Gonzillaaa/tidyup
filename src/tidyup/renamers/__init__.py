@@ -92,6 +92,7 @@ def _register_default_renamers(registry: RenamerRegistry) -> None:
     from .screenshot import ScreenshotRenamer
     from .arxiv import ArxivRenamer
     from .invoice import InvoiceRenamer
+    from .book import BookRenamer
 
     # Set default renamer
     registry.set_default(GenericRenamer())
@@ -100,6 +101,8 @@ def _register_default_renamers(registry: RenamerRegistry) -> None:
     registry.register("ScreenshotDetector", ScreenshotRenamer())
     registry.register("ArxivDetector", ArxivRenamer())
     registry.register("InvoiceDetector", InvoiceRenamer())
+    registry.register("BookDetector", BookRenamer())
+    registry.register("ArchiveBookDetector", BookRenamer())
 
     # PDF renamer for documents detected by GenericDetector
     # (but only if they're PDFs - handled in PDFRenamer)
