@@ -1,4 +1,4 @@
-"""Command-line interface for Tidy."""
+"""Command-line interface for TidyUp."""
 
 import click
 from pathlib import Path
@@ -198,6 +198,137 @@ def reindex() -> None:
 
     console = Console()
     console.print("[dim]Reindex not yet implemented.[/dim]")
+
+
+@main.group()
+def categories() -> None:
+    """Manage category configuration.
+
+    \b
+    Examples:
+        tidyup categories              # List all categories
+        tidyup categories add Music    # Add new category at end
+        tidyup categories add Music --position 5  # Add at position 5
+        tidyup categories remove Music            # Remove a category
+        tidyup categories apply ~/Organized       # Rename folders to match config
+    """
+    pass
+
+
+@categories.command(name="list")
+def categories_list() -> None:
+    """List all configured categories."""
+    from rich.console import Console
+    from rich.table import Table
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    table = Table(title="Categories")
+    table.add_column("#", style="dim", justify="right")
+    table.add_column("Name", style="cyan")
+    table.add_column("Folder", style="green")
+
+    for cat in manager.categories:
+        table.add_row(str(cat.number), cat.name, cat.folder_name)
+
+    console.print(table)
+    console.print()
+    console.print(f"Config: {manager.config_path or 'Using defaults'}")
+
+
+@categories.command(name="add")
+@click.argument("name")
+@click.option("--position", "-p", type=int, help="Position for the new category (1-based)")
+def categories_add(name: str, position: Optional[int]) -> None:
+    """Add a new category."""
+    from rich.console import Console
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    try:
+        category = manager.add(name, position)
+        manager.save()
+        console.print(f"[green]Added category:[/green] {category.folder_name}")
+        console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
+    except ValueError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+@categories.command(name="remove")
+@click.argument("name")
+def categories_remove(name: str) -> None:
+    """Remove a category."""
+    from rich.console import Console
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    try:
+        manager.remove(name)
+        manager.save()
+        console.print(f"[green]Removed category:[/green] {name}")
+        console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
+    except ValueError as e:
+        console.print(f"[red]Error:[/red] {e}")
+        raise SystemExit(1)
+
+
+@categories.command(name="apply")
+@click.argument("path", type=click.Path(exists=True, path_type=Path))
+@click.option("--dry-run", is_flag=True, help="Preview changes without renaming")
+def categories_apply(path: Path, dry_run: bool) -> None:
+    """Rename folders in PATH to match current category configuration.
+
+    This is useful after adding, removing, or reordering categories.
+    """
+    from rich.console import Console
+    from rich.table import Table
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    changes = manager.apply_to_filesystem(path, dry_run=dry_run)
+
+    if not changes:
+        console.print("[dim]No folders need renaming.[/dim]")
+        return
+
+    if dry_run:
+        console.print("[yellow]DRY RUN - no changes will be made[/yellow]")
+
+    table = Table(title="Folder Renames")
+    table.add_column("From", style="red")
+    table.add_column("To", style="green")
+    table.add_column("Status")
+
+    for old_name, new_name in changes:
+        status = "[dim]would rename[/dim]" if dry_run else "[green]renamed[/green]"
+        table.add_row(old_name, new_name, status)
+
+    console.print(table)
+
+    if not dry_run:
+        console.print(f"\n[green]Renamed {len(changes)} folder(s)[/green]")
+
+
+# Make 'tidyup categories' without subcommand show list
+@categories.result_callback()
+@click.pass_context
+def categories_default(ctx: click.Context, *args, **kwargs) -> None:
+    """Show list when no subcommand is given."""
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(categories_list)
 
 
 if __name__ == "__main__":

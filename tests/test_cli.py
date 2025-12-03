@@ -135,3 +135,60 @@ class TestCLIFlags:
 
         assert result.exit_code == 0
         assert "TidyUp" in result.output
+
+
+class TestCategoriesCommands:
+    """Tests for categories subcommands."""
+
+    def test_categories_list(self, cli_runner: CliRunner) -> None:
+        """categories list shows all categories."""
+        result = cli_runner.invoke(main, ["categories", "list"])
+
+        assert result.exit_code == 0
+        assert "Documents" in result.output
+        assert "Screenshots" in result.output
+        assert "Images" in result.output
+        assert "Unsorted" in result.output
+
+    def test_categories_help(self, cli_runner: CliRunner) -> None:
+        """categories --help shows all subcommands."""
+        result = cli_runner.invoke(main, ["categories", "--help"])
+
+        assert result.exit_code == 0
+        assert "list" in result.output
+        assert "add" in result.output
+        assert "remove" in result.output
+        assert "apply" in result.output
+
+    def test_categories_add_shows_in_help(self, cli_runner: CliRunner) -> None:
+        """categories add --help shows usage."""
+        result = cli_runner.invoke(main, ["categories", "add", "--help"])
+
+        assert result.exit_code == 0
+        assert "--position" in result.output
+
+    def test_categories_remove_shows_in_help(self, cli_runner: CliRunner) -> None:
+        """categories remove --help shows usage."""
+        result = cli_runner.invoke(main, ["categories", "remove", "--help"])
+
+        assert result.exit_code == 0
+        assert "NAME" in result.output
+
+    def test_categories_apply_shows_in_help(self, cli_runner: CliRunner) -> None:
+        """categories apply --help shows usage."""
+        result = cli_runner.invoke(main, ["categories", "apply", "--help"])
+
+        assert result.exit_code == 0
+        assert "--dry-run" in result.output
+
+    def test_categories_apply_dry_run(self, cli_runner: CliRunner, tmp_path: Path) -> None:
+        """categories apply --dry-run shows preview."""
+        # Create some folders
+        (tmp_path / "01_Documents").mkdir()
+        (tmp_path / "02_Screenshots").mkdir()
+
+        result = cli_runner.invoke(main, ["categories", "apply", str(tmp_path), "--dry-run"])
+
+        assert result.exit_code == 0
+        # Either shows "No folders need renaming" or "DRY RUN"
+        assert "No folders" in result.output or "DRY RUN" in result.output
