@@ -491,7 +491,7 @@ This document tracks all implementation tasks with story points, dependencies, a
 
 ---
 
-## Phase 7: Configurable Category Routing 🚧 In Progress
+## Phase 7: Configurable Category Routing ✅ Complete
 
 Enable users to create custom categories that actually receive files through configurable routing rules.
 
@@ -574,22 +574,22 @@ Enable users to create custom categories that actually receive files through con
 - [x] User can accept or skip suggestions
 - [x] Dictionary covers common use cases for various professions
 
-### 7.4 Integration and Polish
+### 7.4 Integration and Polish ✅ Complete
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 7.4.1 | End-to-end integration tests | 5 | 🔲 Todo |
-| 7.4.2 | Test with real Downloads folder scenarios | 3 | 🔲 Todo |
-| 7.4.3 | Performance testing (rules evaluation time) | 2 | 🔲 Todo |
-| 7.4.4 | Update manual testing script | 2 | 🔲 Todo |
-| 7.4.5 | Final documentation review | 2 | 🔲 Todo |
+| 7.4.1 | End-to-end integration tests | 5 | ✅ Done |
+| 7.4.2 | Test with real Downloads folder scenarios | 3 | ✅ Done |
+| 7.4.3 | Performance testing (rules evaluation time) | 2 | ✅ Done |
+| 7.4.4 | Update manual testing script | 2 | ✅ Done |
+| 7.4.5 | Final documentation review | 2 | ✅ Done |
 
 **Phase 7 Acceptance Criteria:**
-- [ ] User can redirect existing detector outputs (Level 1)
-- [ ] User can create subcategories with keyword rules (Level 2)
-- [ ] CLI suggests rules when creating categories (Level 3a)
-- [ ] All tests pass
-- [ ] Documentation complete
+- [x] User can redirect existing detector outputs (Level 1)
+- [x] User can create subcategories with keyword rules (Level 2)
+- [x] CLI suggests rules when creating categories (Level 3a)
+- [x] All tests pass (447 tests)
+- [x] Documentation complete
 
 **Estimated total:** ~80 story points
 
@@ -607,8 +607,8 @@ Enable users to create custom categories that actually receive files through con
 | 4.5 Content-Based Enhancements | ✅ Complete | 80 |
 | 5. Safety & Polish | 🟡 Partial | - |
 | 6. Quality & Release | 🟡 Partial | - |
-| 7. Configurable Routing | 🔲 Planned | - |
-| **Total** | | **323 tests** |
+| 7. Configurable Routing | ✅ Complete | 124 |
+| **Total** | | **447 tests** |
 
 ---
 
