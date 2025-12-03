@@ -103,6 +103,13 @@ src/tidyup/
 - **Don't batch commits**: Commit as soon as tests pass, not at the end of a session
 - **Each commit should**: Pass all tests, be self-contained, have a clear purpose
 
+### Feature Branch Workflow
+
+- **Always use feature branches** for new features and significant changes
+- **Create Pull Requests** from feature branches to main
+- **PRs require manual review** - never auto-merge or squash-merge without approval
+- **Wait for approval** before merging any PR
+
 ### Commit Messages
 
 - Use conventional commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`
