@@ -86,21 +86,19 @@ class Engine:
         registry = get_registry()
         return registry.detect(file)
 
-    def _get_folder_name(self, category: str) -> str:
-        """Convert a category name to its folder name.
+    def _get_folder_name(self, category: str, detector_name: str = "") -> str:
+        """Convert a category name to its folder name, applying routing.
 
         Args:
             category: Category name (e.g., "Documents", "Screenshots").
+            detector_name: Name of the detector that produced this category.
 
         Returns:
             Folder name (e.g., "01_Documents", "02_Screenshots").
         """
         manager = get_category_manager()
-        try:
-            return manager.get_folder_name(category)
-        except ValueError:
-            # Unknown category falls back to Unsorted
-            return manager.get_folder_name("Unsorted")
+        # Use the new method that applies routing rules
+        return manager.get_folder_for_detection(category, detector_name)
 
     def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> RenameResult | None:
         """Generate a new filename for a file.
@@ -165,12 +163,12 @@ class Engine:
             # Move to destination (resolve category name to folder name)
             # destination is guaranteed to be set if not rename_only (see __init__)
             assert self.destination is not None
-            folder_name = self._get_folder_name(detection.category)
+            folder_name = self._get_folder_name(detection.category, detection.detector_name)
             dest_path = self.destination / folder_name / final_name
 
         # Step 6: Check for duplicates (only when moving)
         if not self.rename_only and self.destination:
-            folder_name = self._get_folder_name(detection.category)
+            folder_name = self._get_folder_name(detection.category, detection.detector_name)
             dest_folder = self.destination / folder_name
             if dest_folder.exists():
                 existing = is_duplicate(file.path, dest_folder)

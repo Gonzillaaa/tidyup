@@ -45,6 +45,11 @@ tidyup <source> [destination]
 | `tidyup categories add <name>` | Add a new category |
 | `tidyup categories remove <name>` | Remove a category |
 | `tidyup categories apply <path>` | Rename folders to match current config |
+| `tidyup routing` | List all routing rules |
+| `tidyup routing list` | Same as above |
+| `tidyup routing set <from> <to>` | Add a routing rule (global) |
+| `tidyup routing set <from> <to> -d <detector>` | Add a detector-specific routing rule |
+| `tidyup routing remove <from>` | Remove a routing rule |
 
 ## Category Management
 
@@ -114,6 +119,92 @@ categories:
   - Images
   - Videos
   # ... order determines folder numbers
+```
+
+## Category Routing
+
+Routing allows you to redirect files from one category to another. This is useful when:
+- You want to rename a default category (e.g., "Documents" → "Paperwork")
+- You want certain file types to go to a custom category
+- You want invoices to go to an "Invoices" folder instead of "Documents"
+
+### Viewing Routing Rules
+
+```bash
+tidyup routing
+```
+
+Shows all configured routing rules.
+
+### Setting a Global Remap
+
+Redirect ALL files from one category to another:
+
+```bash
+# All files detected as "Documents" now go to "PDF" folder
+tidyup routing set Documents PDF
+```
+
+### Setting a Detector-Specific Remap
+
+Redirect only files from a specific detector:
+
+```bash
+# Only files detected as invoices go to "Invoices" folder
+tidyup routing set Documents Invoices --detector InvoiceDetector
+```
+
+**Available detectors:**
+- `ScreenshotDetector` - Screenshots
+- `ArxivDetector` - arXiv papers
+- `PaperDetector` - Academic PDFs with DOI
+- `InvoiceDetector` - Invoices and receipts
+- `InstallerDetector` - App installers
+- `ArchiveBookDetector` - Books in archives
+- `BookDetector` - E-books (EPUB, MOBI)
+- `GenericDetector` - Fallback extension-based detection
+
+### Removing a Routing Rule
+
+```bash
+# Remove global remap
+tidyup routing remove Documents
+
+# Remove detector-specific remap
+tidyup routing remove Documents --detector InvoiceDetector
+```
+
+### Example: Custom Invoices Folder
+
+```bash
+# 1. Create the Invoices category
+tidyup categories add Invoices
+
+# 2. Route invoice detections to it
+tidyup routing set Documents Invoices --detector InvoiceDetector
+
+# 3. Now invoices go to your new Invoices folder!
+tidyup ~/Downloads --dry-run
+```
+
+### Routing Configuration
+
+Routing rules are saved in `~/.tidy/config.yaml`:
+
+```yaml
+categories:
+  - Documents
+  - Screenshots
+  - Invoices  # Custom category
+
+routing:
+  remap:
+    # Detector-specific: only invoices → Invoices
+    InvoiceDetector:
+      Documents: Invoices
+
+    # Global: all "Books" → "Library" (if you had this)
+    # Books: Library
 ```
 
 ## Rename Examples

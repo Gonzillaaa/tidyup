@@ -6,6 +6,7 @@ and modified via CLI commands.
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -56,6 +57,118 @@ class Category:
 
 
 @dataclass
+class RoutingConfig:
+    """Configuration for category routing/remapping.
+
+    Allows redirecting detector outputs to different categories.
+
+    Attributes:
+        remap: Mapping of remaps. Can be:
+            - Global: {"Documents": "PDF"} - all Documents go to PDF
+            - Per-detector: {"InvoiceDetector": {"Documents": "Invoices"}}
+    """
+
+    remap: dict[str, Any] = field(default_factory=dict)
+
+    def apply_remap(self, detector_name: str, category: str) -> str:
+        """Apply routing rules to remap a category.
+
+        Checks detector-specific remaps first, then global remaps.
+
+        Args:
+            detector_name: Name of the detector that produced the category.
+            category: Original category name.
+
+        Returns:
+            Remapped category name, or original if no remap applies.
+        """
+        # Check detector-specific remap first
+        detector_remaps = self.remap.get(detector_name)
+        if isinstance(detector_remaps, dict) and category in detector_remaps:
+            result = detector_remaps[category]
+            return str(result) if result else category
+
+        # Check global remap (string value means direct remap)
+        if category in self.remap and isinstance(self.remap[category], str):
+            return str(self.remap[category])
+
+        return category
+
+    def set_remap(
+        self,
+        from_category: str,
+        to_category: str,
+        detector_name: str | None = None,
+    ) -> None:
+        """Set a routing remap rule.
+
+        Args:
+            from_category: Original category name.
+            to_category: Target category name.
+            detector_name: Optional detector to limit the remap to.
+        """
+        if detector_name:
+            # Per-detector remap
+            if detector_name not in self.remap:
+                self.remap[detector_name] = {}
+            self.remap[detector_name][from_category] = to_category
+        else:
+            # Global remap
+            self.remap[from_category] = to_category
+
+    def remove_remap(
+        self,
+        from_category: str,
+        detector_name: str | None = None,
+    ) -> bool:
+        """Remove a routing remap rule.
+
+        Args:
+            from_category: Original category name.
+            detector_name: Optional detector to limit removal to.
+
+        Returns:
+            True if a remap was removed, False if not found.
+        """
+        if detector_name:
+            # Per-detector remap
+            if detector_name in self.remap and isinstance(
+                self.remap[detector_name], dict
+            ):
+                if from_category in self.remap[detector_name]:
+                    del self.remap[detector_name][from_category]
+                    # Clean up empty detector dict
+                    if not self.remap[detector_name]:
+                        del self.remap[detector_name]
+                    return True
+        else:
+            # Global remap
+            if from_category in self.remap and isinstance(
+                self.remap[from_category], str
+            ):
+                del self.remap[from_category]
+                return True
+        return False
+
+    def list_remaps(self) -> list[dict[str, str]]:
+        """List all configured remaps.
+
+        Returns:
+            List of remap entries with detector, from, and to keys.
+        """
+        result = []
+        for key, value in self.remap.items():
+            if isinstance(value, str):
+                # Global remap
+                result.append({"detector": "*", "from": key, "to": value})
+            elif isinstance(value, dict):
+                # Per-detector remaps
+                for from_cat, to_cat in value.items():
+                    result.append({"detector": key, "from": from_cat, "to": to_cat})
+        return result
+
+
+@dataclass
 class CategoryManager:
     """Manages file categories with config persistence.
 
@@ -64,10 +177,12 @@ class CategoryManager:
 
     Attributes:
         categories: List of Category objects.
+        routing: Routing configuration for category remapping.
         config_path: Path to config file.
     """
 
     categories: list[Category] = field(default_factory=list)
+    routing: RoutingConfig = field(default_factory=RoutingConfig)
     config_path: Path | None = None
 
     def __post_init__(self) -> None:
@@ -76,12 +191,13 @@ class CategoryManager:
             self.config_path = Path.home() / ".tidy" / "config.yaml"
 
     def load(self) -> None:
-        """Load categories from config file or use defaults.
+        """Load categories and routing from config file or use defaults.
 
         If config file doesn't exist or has no categories section,
         uses DEFAULT_CATEGORIES.
         """
         category_names = DEFAULT_CATEGORIES.copy()
+        routing_config: dict[str, Any] = {}
 
         if self.config_path and self.config_path.exists():
             try:
@@ -96,9 +212,16 @@ class CategoryManager:
                             category_names.append(item)
                         elif isinstance(item, dict) and "name" in item:
                             category_names.append(item["name"])
+
+                # Load routing configuration
+                if "routing" in config and isinstance(config["routing"], dict):
+                    remap = config["routing"].get("remap", {})
+                    if isinstance(remap, dict):
+                        routing_config = remap
             except (yaml.YAMLError, OSError):
                 # Fall back to defaults on any error
                 category_names = DEFAULT_CATEGORIES.copy()
+                routing_config = {}
 
         # Build categories with numbers
         self.categories = []
@@ -108,8 +231,11 @@ class CategoryManager:
         # Always add Unsorted at 99
         self.categories.append(Category(number=UNSORTED_NUMBER, name=UNSORTED_CATEGORY))
 
+        # Set up routing
+        self.routing = RoutingConfig(remap=routing_config)
+
     def save(self) -> None:
-        """Save categories to config file.
+        """Save categories and routing to config file.
 
         Creates config directory if it doesn't exist.
         Preserves other config sections.
@@ -121,7 +247,7 @@ class CategoryManager:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Load existing config to preserve other sections
-        config: dict = {}
+        config: dict[str, Any] = {}
         if self.config_path.exists():
             try:
                 with open(self.config_path) as f:
@@ -133,6 +259,17 @@ class CategoryManager:
         config["categories"] = [
             cat.name for cat in self.categories if cat.name != UNSORTED_CATEGORY
         ]
+
+        # Update routing section (only if there are remaps)
+        if self.routing.remap:
+            if "routing" not in config:
+                config["routing"] = {}
+            config["routing"]["remap"] = self.routing.remap
+        elif "routing" in config and "remap" in config["routing"]:
+            # Remove empty remap section
+            del config["routing"]["remap"]
+            if not config["routing"]:
+                del config["routing"]
 
         # Write config
         with open(self.config_path, "w") as f:
@@ -169,6 +306,42 @@ class CategoryManager:
         if cat is None:
             raise ValueError(f"Unknown category: {name}")
         return cat.folder_name
+
+    def resolve_category(self, category: str, detector_name: str) -> str:
+        """Resolve a category name after applying routing rules.
+
+        This method applies any configured routing remaps to determine
+        the final category name. It's called after detection, before
+        looking up the folder name.
+
+        Args:
+            category: Original category from detector.
+            detector_name: Name of the detector that produced the category.
+
+        Returns:
+            Final category name after routing rules applied.
+        """
+        return self.routing.apply_remap(detector_name, category)
+
+    def get_folder_for_detection(self, category: str, detector_name: str) -> str:
+        """Get folder name for a detection result, applying routing.
+
+        This is the main entry point for engine.py to determine where
+        to put a file after detection.
+
+        Args:
+            category: Category from detector.
+            detector_name: Name of the detector.
+
+        Returns:
+            Folder name in NN_Name format.
+        """
+        resolved = self.resolve_category(category, detector_name)
+        try:
+            return self.get_folder_name(resolved)
+        except ValueError:
+            # If resolved category doesn't exist, fall back to Unsorted
+            return self.get_folder_name("Unsorted")
 
     def add(self, name: str, position: int | None = None) -> Category:
         """Add a new category at the specified position.

@@ -325,5 +325,137 @@ def categories_apply(path: Path, dry_run: bool) -> None:
         console.print(f"\n[green]Renamed {len(changes)} folder(s)[/green]")
 
 
+@main.group(invoke_without_command=True)
+@click.pass_context
+def routing(ctx: click.Context) -> None:
+    """Manage category routing rules.
+
+    Routing allows remapping detector outputs to different categories.
+    For example, redirect all files detected as "Documents" by the
+    InvoiceDetector to an "Invoices" category instead.
+
+    \\b
+    Examples:
+        tidyup routing                           # List all routing rules
+        tidyup routing list                      # Same as above
+        tidyup routing set Documents PDF         # Global: Documents → PDF
+        tidyup routing set Documents Invoices --detector InvoiceDetector
+        tidyup routing remove Documents          # Remove global remap
+        tidyup routing remove Documents --detector InvoiceDetector
+    """
+    if ctx.invoked_subcommand is None:
+        # No subcommand given, show list
+        ctx.invoke(routing_list)
+
+
+@routing.command(name="list")
+def routing_list() -> None:
+    """List all configured routing rules."""
+    from rich.console import Console
+    from rich.table import Table
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    remaps = manager.routing.list_remaps()
+
+    if not remaps:
+        console.print("[dim]No routing rules configured.[/dim]")
+        console.print()
+        console.print("Add a rule with:")
+        console.print("  tidyup routing set <from> <to>")
+        console.print("  tidyup routing set <from> <to> --detector <name>")
+        return
+
+    table = Table(title="Routing Rules")
+    table.add_column("Detector", style="cyan")
+    table.add_column("From", style="yellow")
+    table.add_column("To", style="green")
+
+    for remap in remaps:
+        detector_display = remap["detector"] if remap["detector"] != "*" else "[dim]*[/dim]"
+        table.add_row(detector_display, remap["from"], remap["to"])
+
+    console.print(table)
+    console.print()
+    console.print(f"[dim]Config: {manager.config_path}[/dim]")
+
+
+@routing.command(name="set")
+@click.argument("from_category")
+@click.argument("to_category")
+@click.option(
+    "--detector", "-d",
+    help="Only apply to this detector (e.g., InvoiceDetector)",
+)
+def routing_set(from_category: str, to_category: str, detector: str | None) -> None:
+    """Set a routing rule to remap categories.
+
+    \\b
+    Arguments:
+        FROM_CATEGORY  Original category from detector
+        TO_CATEGORY    Target category to route to
+    """
+    from rich.console import Console
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    # Validate that target category exists
+    if manager.get_by_name(to_category) is None:
+        console.print(f"[red]Error:[/red] Category '{to_category}' does not exist.")
+        console.print(f"[dim]Create it first with: tidyup categories add {to_category}[/dim]")
+        raise SystemExit(1)
+
+    # Set the remap
+    manager.routing.set_remap(from_category, to_category, detector)
+    manager.save()
+
+    if detector:
+        console.print(
+            f"[green]Routing set:[/green] {detector}: {from_category} → {to_category}"
+        )
+    else:
+        console.print(f"[green]Routing set:[/green] {from_category} → {to_category}")
+
+    console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
+
+
+@routing.command(name="remove")
+@click.argument("from_category")
+@click.option(
+    "--detector", "-d",
+    help="Only remove for this detector",
+)
+def routing_remove(from_category: str, detector: str | None) -> None:
+    """Remove a routing rule."""
+    from rich.console import Console
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    removed = manager.routing.remove_remap(from_category, detector)
+
+    if removed:
+        manager.save()
+        if detector:
+            console.print(
+                f"[green]Removed routing:[/green] {detector}: {from_category}"
+            )
+        else:
+            console.print(f"[green]Removed routing:[/green] {from_category}")
+        console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
+    else:
+        console.print(f"[yellow]No routing rule found for:[/yellow] {from_category}")
+        if detector:
+            console.print(f"[dim]Detector: {detector}[/dim]")
+
+
 if __name__ == "__main__":
     main()
