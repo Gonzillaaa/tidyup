@@ -1,4 +1,4 @@
-"""Utility functions for Tidy.
+"""Utility functions for TidyUp.
 
 This module contains helper functions for file operations, string sanitization,
 hashing, and date handling.

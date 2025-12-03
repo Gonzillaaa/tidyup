@@ -1,4 +1,4 @@
-"""File discovery for Tidy.
+"""File discovery for TidyUp.
 
 This module handles discovering files to process, with support for
 filtering by patterns, hidden files, and recency.

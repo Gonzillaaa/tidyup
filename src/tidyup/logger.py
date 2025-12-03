@@ -1,4 +1,4 @@
-"""Logging system for Tidy.
+"""Logging system for TidyUp.
 
 This module handles logging all file operations to JSON files
 for auditing and status reporting.

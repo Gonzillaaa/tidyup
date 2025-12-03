@@ -1,4 +1,4 @@
-"""Data models for Tidy.
+"""Data models for TidyUp.
 
 This module contains all the dataclasses used throughout the application
 for representing files, detection results, actions, and run summaries.
