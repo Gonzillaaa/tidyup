@@ -200,8 +200,9 @@ def reindex() -> None:
     console.print("[dim]Reindex not yet implemented.[/dim]")
 
 
-@main.group()
-def categories() -> None:
+@main.group(invoke_without_command=True)
+@click.pass_context
+def categories(ctx: click.Context) -> None:
     """Manage category configuration.
 
     \b
@@ -212,7 +213,9 @@ def categories() -> None:
         tidyup categories remove Music            # Remove a category
         tidyup categories apply ~/Organized       # Rename folders to match config
     """
-    pass
+    if ctx.invoked_subcommand is None:
+        # No subcommand given, show list
+        ctx.invoke(categories_list)
 
 
 @categories.command(name="list")
@@ -320,15 +323,6 @@ def categories_apply(path: Path, dry_run: bool) -> None:
 
     if not dry_run:
         console.print(f"\n[green]Renamed {len(changes)} folder(s)[/green]")
-
-
-# Make 'tidyup categories' without subcommand show list
-@categories.result_callback()
-@click.pass_context
-def categories_default(ctx: click.Context, *args: object, **kwargs: object) -> None:
-    """Show list when no subcommand is given."""
-    if ctx.invoked_subcommand is None:
-        ctx.invoke(categories_list)
 
 
 if __name__ == "__main__":
