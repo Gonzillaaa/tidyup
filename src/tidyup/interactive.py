@@ -62,9 +62,9 @@ class InteractiveHandler:
 
         # Show options
         self.console.print()
-        self.console.print("  [bold]Y[/bold] - Accept (move to {})".format(detection.category))
+        self.console.print(f"  [bold]Y[/bold] - Accept (move to {detection.category})")
         self.console.print("  [bold]n[/bold] - Skip this file")
-        self.console.print("  [bold]s[/bold] - Skip all {} files".format(file.extension.upper()))
+        self.console.print(f"  [bold]s[/bold] - Skip all {file.extension.upper()} files")
         self.console.print("  [bold]c[/bold] - Change category")
 
         choice = Prompt.ask(

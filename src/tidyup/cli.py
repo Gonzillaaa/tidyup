@@ -132,7 +132,7 @@ def run_organize(source: Path, destination: Path | None, options: dict) -> None:
         result = engine.run()
     else:
         # Live run: show progress bar
-        from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+        from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 
         with Progress(
             SpinnerColumn(),
@@ -217,7 +217,7 @@ def status() -> None:
     from rich.console import Console
     from rich.table import Table
 
-    from .logger import aggregate_logs, list_logs, load_log, get_tidy_dir
+    from .logger import aggregate_logs, get_tidy_dir, list_logs, load_log
     from .utils import format_size
 
     console = Console()
@@ -304,7 +304,8 @@ def status() -> None:
     if stats["total_runs"] > 0:
         console.print()
         console.print("[bold]Recent Activity (last 7 days):[/bold]")
-        console.print(f"  → {stats['total_processed']} files processed in {stats['total_runs']} runs")
+        total = stats['total_processed']
+        console.print(f"  → {total} files processed in {stats['total_runs']} runs")
         if stats["total_errors"] > 0:
             console.print(f"  → [red]{stats['total_errors']} errors[/red]")
 
