@@ -491,36 +491,36 @@ This document tracks all implementation tasks with story points, dependencies, a
 
 ---
 
-## Phase 7: Configurable Category Routing 🔲 Planned
+## Phase 7: Configurable Category Routing 🚧 In Progress
 
 Enable users to create custom categories that actually receive files through configurable routing rules.
 
 **Problem solved:** Currently, adding a custom category (e.g., `tidyup categories add PDF`) creates the folder but no files route there because detectors return hardcoded category names.
 
 **Solution:** Three levels of configuration:
-- Level 1: Remap detector outputs to different categories
+- Level 1: Remap detector outputs to different categories ✅
 - Level 2: Define keyword/pattern rules for subcategorization
 - Level 3: Smart defaults with static dictionary suggestions
 
-### 7.1 Level 1: Category Remapping
+### 7.1 Level 1: Category Remapping ✅ Complete
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 7.1.1 | Add `RoutingConfig` dataclass to categories.py | 2 | 🔲 Todo |
-| 7.1.2 | Add `routing.remap` section to config schema | 2 | 🔲 Todo |
-| 7.1.3 | Implement `apply_remap(detector_name, category)` method | 2 | 🔲 Todo |
-| 7.1.4 | Integrate remap into engine.py after detection | 3 | 🔲 Todo |
-| 7.1.5 | Add `tidyup routing list` CLI command | 2 | 🔲 Todo |
-| 7.1.6 | Add `tidyup routing set <detector> <from> <to>` command | 2 | 🔲 Todo |
-| 7.1.7 | Add `tidyup routing remove <detector> <from>` command | 1 | 🔲 Todo |
-| 7.1.8 | Write routing tests | 3 | 🔲 Todo |
-| 7.1.9 | Update USER_GUIDE.md with routing docs | 2 | 🔲 Todo |
+| 7.1.1 | Add `RoutingConfig` dataclass to categories.py | 2 | ✅ Done |
+| 7.1.2 | Add `routing.remap` section to config schema | 2 | ✅ Done |
+| 7.1.3 | Implement `apply_remap(detector_name, category)` method | 2 | ✅ Done |
+| 7.1.4 | Integrate remap into engine.py after detection | 3 | ✅ Done |
+| 7.1.5 | Add `tidyup routing list` CLI command | 2 | ✅ Done |
+| 7.1.6 | Add `tidyup routing set <detector> <from> <to>` command | 2 | ✅ Done |
+| 7.1.7 | Add `tidyup routing remove <detector> <from>` command | 1 | ✅ Done |
+| 7.1.8 | Write routing tests | 3 | ✅ Done |
+| 7.1.9 | Update USER_GUIDE.md with routing docs | 2 | ✅ Done |
 
 **Acceptance Criteria:**
-- [ ] Can remap InvoiceDetector's "Documents" → "Invoices"
-- [ ] Can globally remap "Documents" → "PDF"
-- [ ] Remap persists in config.yaml
-- [ ] CLI commands work for list/set/remove
+- [x] Can remap InvoiceDetector's "Documents" → "Invoices"
+- [x] Can globally remap "Documents" → "PDF"
+- [x] Remap persists in config.yaml
+- [x] CLI commands work for list/set/remove
 
 ### 7.2 Level 2: Config-Based Rules
 
