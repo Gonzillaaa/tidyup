@@ -1,29 +1,29 @@
-# Tidy - Downloads Organizer
+# TidyUp - Downloads Organizer
 
 ## Overview
 
 A global CLI tool written in Python that organizes, renames, and categorizes files from any directory into a structured destination.
 
-**Core Principle:** Tidy never deletes files. It only moves and renames.
+**Core Principle:** TidyUp never deletes files. It only moves and renames.
 
 ---
 
 ## CLI Interface
 
 ```bash
-tidy <source> [destination]       # Move + rename (default behavior)
-tidy ~/Downloads                  # Uses default destination from config
-tidy ~/Downloads ~/Organized      # Explicit destination
-tidy . --dry-run                  # Preview changes
-tidy ~/Downloads --move           # Only categorize and move, keep original names
-tidy ~/Downloads --rename         # Only rename in place (no destination needed)
-tidy ~/Downloads --skip           # Skip uncertain files entirely
-tidy ~/Downloads --interactive    # Prompt for uncertain files
-tidy ~/Downloads --limit 20       # Process only 20 files
+tidyup <source> [destination]       # Move + rename (default behavior)
+tidyup ~/Downloads                  # Uses default destination from config
+tidyup ~/Downloads ~/Organized      # Explicit destination
+tidyup . --dry-run                  # Preview changes
+tidyup ~/Downloads --move           # Only categorize and move, keep original names
+tidyup ~/Downloads --rename         # Only rename in place (no destination needed)
+tidyup ~/Downloads --skip           # Skip uncertain files entirely
+tidyup ~/Downloads --interactive    # Prompt for uncertain files
+tidyup ~/Downloads --limit 20       # Process only 20 files
 
 # Utility commands
-tidy reindex                      # Renumber destination folders
-tidy status                       # Show statistics from logs
+tidyup reindex                      # Renumber destination folders
+tidyup status                       # Show statistics from logs
 ```
 
 ### Arguments
@@ -49,20 +49,20 @@ tidy status                       # Show statistics from logs
 ### Flag Combinations
 
 ```bash
-tidy ~/Downloads                       # Move + rename (default)
-tidy ~/Downloads --move                # Move only, keep names
-tidy ~/Downloads --rename              # Rename only, stay in place
-tidy ~/Downloads --move --dry-run      # Preview moves
-tidy ~/Downloads --rename --dry-run    # Preview renames
-tidy ~/Downloads --skip                # Move + rename, skip uncertain
-tidy ~/Downloads --skip --move         # Move only, skip uncertain
+tidyup ~/Downloads                       # Move + rename (default)
+tidyup ~/Downloads --move                # Move only, keep names
+tidyup ~/Downloads --rename              # Rename only, stay in place
+tidyup ~/Downloads --move --dry-run      # Preview moves
+tidyup ~/Downloads --rename --dry-run    # Preview renames
+tidyup ~/Downloads --skip                # Move + rename, skip uncertain
+tidyup ~/Downloads --skip --move         # Move only, skip uncertain
 ```
 
 ---
 
 ## Operations: Move vs Rename
 
-Tidy has two core operations that can be used independently or together:
+TidyUp has two core operations that can be used independently or together:
 
 ### Move (Categorization)
 
@@ -88,7 +88,7 @@ Both operations together: categorize AND rename.
 
 ## Content Inspection
 
-Tidy reads inside files to make smart decisions. This is the core intelligence.
+TidyUp reads inside files to make smart decisions. This is the core intelligence.
 
 ### For Categorization (Move)
 
@@ -217,12 +217,12 @@ Every operation is logged for auditability and undo potential.
 
 ## Status Command
 
-`tidy status` reads from logs and shows aggregate statistics.
+`tidyup status` reads from logs and shows aggregate statistics.
 
 ```
-$ tidy status
+$ tidyup status
 
-Tidy Status
+TidyUp Status
 ═══════════════════════════════════════════════════
 
 Destination: ~/Documents/Organized
@@ -332,7 +332,7 @@ Each detector is a modular Python class. New detectors can be added without modi
 
 ### No Deletion Policy
 
-Tidy **never deletes files**. It only:
+TidyUp **never deletes files**. It only:
 - Moves files to the destination
 - Renames files according to patterns
 

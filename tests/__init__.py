@@ -1,1 +1,1 @@
-"""Tests for Tidy."""
+"""Tests for TidyUp."""

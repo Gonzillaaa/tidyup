@@ -4,13 +4,21 @@
 
 **Make atomic git commits as you work, not at the end.** After implementing each logical unit (a new class, a detector, a feature) and tests pass, commit immediately. Do not batch changes.
 
+## CRITICAL: Maintain the Backlog
+
+**Keep BACKLOG.md current as you work.** Mark tasks complete when done, add new tasks as they emerge, and update estimates based on learnings. The backlog should always reflect the true state of the project.
+
 ## CRITICAL: Keep Documentation Current
 
 **Update documentation as you implement features, not at the end.** When adding new functionality (commands, detectors, options), immediately update the relevant docs (README, BACKLOG, etc.). Documentation should never lag behind implementation.
 
-## CRITICAL: Maintain the Backlog
+## CRITICAL: Documentation Principles
 
-**Keep BACKLOG.md current as you work.** Mark tasks complete when done, add new tasks as they emerge, and update estimates based on learnings. The backlog should always reflect the true state of the project.
+Documentation must be:
+- **Accurate**: Reflects actual implementation, no "coming soon" for shipped features
+- **Consistent**: Use "TidyUp" (not "Tidy") everywhere, consistent terminology
+- **Concise**: Clear and helpful without unnecessary verbosity
+- **Current**: Updated immediately when features change, not as an afterthought
 
 ## Project Overview
 

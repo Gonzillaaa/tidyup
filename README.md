@@ -1,4 +1,4 @@
-# Tidy
+# TidyUp
 
 A command-line tool to organize, rename, and categorize files from your Downloads folder (or any directory) into a clean, structured destination.
 
@@ -42,8 +42,8 @@ pip install -e .
 brew install pipx  # macOS
 # or: pip install pipx
 
-# Install tidy
-cd /path/to/tidy
+# Install tidyup
+cd /path/to/tidyup
 pipx install -e .
 ```
 
@@ -99,7 +99,7 @@ tidyup [OPTIONS] SOURCE [DESTINATION]
 | Command | Description |
 |---------|-------------|
 | `tidyup status` | Show organization statistics from logs |
-| `tidyup reindex` | Renumber destination folders (coming soon) |
+| `tidyup reindex` | Renumber destination folders |
 | `tidyup categories` | Manage category configuration |
 | `tidyup categories list` | Show all configured categories |
 | `tidyup categories add <name>` | Add a new category (use `--position N` for specific position) |
@@ -129,7 +129,7 @@ DRY RUN - no files will be changed
 ┃ File          ┃ Category     ┃ Status  ┃ Destination  ┃
 ┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━┩
 │ report.pdf    │ 01_Documents │ success │ report.pdf   │
-│ photo.jpg     │ 02_Images    │ success │ photo.jpg    │
+│ photo.jpg     │ 03_Images    │ success │ photo.jpg    │
 │ unknown.xyz   │ 99_Unsorted  │ success │ unknown.xyz  │
 └───────────────┴──────────────┴─────────┴──────────────┘
 
@@ -356,7 +356,7 @@ Files with identical content (same SHA-256 hash) are moved to `99_Unsorted/_dupl
 
 #### "No files to process"
 
-Tidy automatically skips:
+TidyUp automatically skips:
 - Hidden files (starting with `.`)
 - System files (`.DS_Store`, `Thumbs.db`)
 - Partial downloads (`.crdownload`, `.part`, `.download`)
@@ -369,8 +369,8 @@ Tidy automatically skips:
 tidyup --help
 
 # Show subcommand help
-tidyup run --help
 tidyup status --help
+tidyup categories --help
 ```
 
 ### Viewing Logs
@@ -406,7 +406,7 @@ pip install -e .
 pytest
 
 # Run tests with coverage
-pytest --cov=tidy
+pytest --cov=tidyup
 
 # Run a specific test file
 pytest tests/test_engine.py -v

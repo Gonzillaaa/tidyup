@@ -181,7 +181,7 @@ def status() -> None:
 
     console = Console()
 
-    console.print("[bold]Tidy Status[/bold]")
+    console.print("[bold]TidyUp Status[/bold]")
     console.print("═" * 50)
     console.print()
     console.print("Destination: ~/Documents/Organized")
