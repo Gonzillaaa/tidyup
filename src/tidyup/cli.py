@@ -178,17 +178,100 @@ def run_organize(source: Path, destination: Path | None, options: dict) -> None:
 def status() -> None:
     """Show organization statistics from logs."""
     from rich.console import Console
+    from rich.table import Table
+
+    from .logger import aggregate_logs, list_logs, load_log, get_tidy_dir
+    from .utils import format_size
 
     console = Console()
 
+    # Default destination
+    dest = Path.home() / "Documents" / "Organized"
+    config_path = Path.home() / ".tidy" / "config.yaml"
+    logs_dir = get_tidy_dir() / "logs"
+
+    # Count log files
+    log_count = len(list_logs()) if logs_dir.exists() else 0
+
+    console.print()
     console.print("[bold]TidyUp Status[/bold]")
     console.print("═" * 50)
     console.print()
-    console.print("Destination: ~/Documents/Organized")
-    console.print("Config:      ~/.tidy/config.yaml")
-    console.print("Logs:        ~/.tidy/logs/")
+    console.print(f"Destination: {dest}")
+    console.print(f"Config:      {config_path}")
+    console.print(f"Logs:        {logs_dir} ({log_count} files)")
     console.print()
-    console.print("[dim]Full status not yet implemented.[/dim]")
+
+    # Scan destination folders for stats
+    if dest.exists():
+        table = Table(show_header=True, header_style="bold")
+        table.add_column("Folder", style="cyan")
+        table.add_column("Files", justify="right")
+        table.add_column("Size", justify="right")
+
+        total_files = 0
+        total_size = 0
+
+        # Get all numbered folders sorted
+        folders = sorted(
+            [f for f in dest.iterdir() if f.is_dir() and not f.name.startswith(".")],
+            key=lambda f: f.name,
+        )
+
+        for folder in folders:
+            # Count files and size
+            file_count = 0
+            folder_size = 0
+            for item in folder.rglob("*"):
+                if item.is_file():
+                    file_count += 1
+                    folder_size += item.stat().st_size
+
+            total_files += file_count
+            total_size += folder_size
+
+            if file_count > 0:  # Only show non-empty folders
+                table.add_row(
+                    f"{folder.name}/",
+                    str(file_count),
+                    format_size(folder_size),
+                )
+
+        # Add separator and total
+        table.add_row("─" * 20, "─" * 6, "─" * 8, style="dim")
+        table.add_row(
+            "[bold]Total[/bold]",
+            f"[bold]{total_files}[/bold]",
+            f"[bold]{format_size(total_size)}[/bold]",
+        )
+
+        console.print(table)
+    else:
+        console.print(f"[dim]Destination not found: {dest}[/dim]")
+
+    console.print()
+
+    # Last run info
+    logs = list_logs(limit=1)
+    if logs:
+        try:
+            last_run = load_log(logs[0])
+            console.print(f"[bold]Last Run:[/bold] {last_run.timestamp.strftime('%Y-%m-%d %H:%M')}")
+            s = last_run.summary
+            console.print(f"  → Moved {s.moved} files, renamed {s.renamed}, skipped {s.skipped}")
+        except Exception:
+            pass
+
+    # Recent activity
+    stats = aggregate_logs(days=7)
+    if stats["total_runs"] > 0:
+        console.print()
+        console.print("[bold]Recent Activity (last 7 days):[/bold]")
+        console.print(f"  → {stats['total_processed']} files processed in {stats['total_runs']} runs")
+        if stats["total_errors"] > 0:
+            console.print(f"  → [red]{stats['total_errors']} errors[/red]")
+
+    console.print()
 
 
 @main.command()
