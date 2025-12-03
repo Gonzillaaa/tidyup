@@ -100,6 +100,11 @@ tidyup [OPTIONS] SOURCE [DESTINATION]
 |---------|-------------|
 | `tidyup status` | Show organization statistics from logs |
 | `tidyup reindex` | Renumber destination folders (coming soon) |
+| `tidyup categories` | Manage category configuration |
+| `tidyup categories list` | Show all configured categories |
+| `tidyup categories add <name>` | Add a new category (use `--position N` for specific position) |
+| `tidyup categories remove <name>` | Remove a category |
+| `tidyup categories apply <path>` | Rename folders in path to match current config |
 
 ## Usage Examples
 
@@ -192,46 +197,99 @@ Files are organized into numbered folders at the destination:
 
 ```
 ~/Documents/Organized/
-├── 01_Documents/     # PDFs, DOCX, TXT, RTF, etc.
-├── 02_Images/        # PNG, JPEG, GIF, HEIC, etc.
-├── 03_Videos/        # MP4, MOV, AVI, MKV, etc.
-├── 04_Audio/         # MP3, WAV, FLAC, M4A, etc.
-├── 05_Archives/      # ZIP, RAR, 7Z, TAR, etc.
-├── 06_Code/          # PY, JS, TS, HTML, CSS, etc.
-├── 07_Books/         # EPUB, MOBI, AZW, etc.
-├── 08_Data/          # CSV, JSON, SQL, DB, etc.
+├── 01_Documents/     # PDFs, DOCX, TXT, RTF, invoices, etc.
+├── 02_Screenshots/   # Screenshots (macOS, Windows, CleanShot, etc.)
+├── 03_Images/        # PNG, JPEG, GIF, HEIC, etc.
+├── 04_Videos/        # MP4, MOV, AVI, MKV, etc.
+├── 05_Audio/         # MP3, WAV, FLAC, M4A, etc.
+├── 06_Archives/      # ZIP, RAR, 7Z, TAR, etc.
+├── 07_Code/          # PY, JS, TS, HTML, CSS, etc.
+├── 08_Books/         # EPUB, MOBI, AZW, PDFs with ISBN, archives with books
+├── 09_Papers/        # Research papers, arXiv PDFs, academic documents
+├── 10_Data/          # CSV, JSON, SQL, DB, etc.
+├── 11_Installers/    # DMG, PKG, EXE, MSI, DEB, etc.
 └── 99_Unsorted/      # Files that couldn't be categorized
     └── _duplicates/  # Duplicate files (same content hash)
 ```
 
+Categories are configurable via `~/.tidy/config.yaml`. Use `tidyup categories` commands to manage them.
+
 ### Category Detection
 
-Files are categorized primarily by extension:
+Files are categorized using smart detection that goes beyond just file extensions:
 
-| Category | Extensions |
-|----------|------------|
+| Category | How Detected |
+|----------|--------------|
 | Documents | pdf, doc, docx, txt, rtf, odt, xls, xlsx, ppt, pptx |
+| Screenshots | Filename patterns (macOS, Windows, CleanShot, localized) |
 | Images | jpg, jpeg, png, gif, bmp, webp, svg, heic, heif |
 | Videos | mp4, mov, avi, mkv, wmv, webm |
 | Audio | mp3, wav, flac, aac, ogg, m4a |
 | Archives | zip, rar, 7z, tar, gz, bz2 |
 | Code | py, js, ts, java, c, cpp, go, rs, rb, html, css |
-| Books | epub, mobi, azw, azw3 |
+| Books | epub, mobi, azw3 + PDFs with ISBN + archives containing ebooks |
+| Papers | arXiv PDFs (YYMM.NNNNN) + PDFs with academic keywords (abstract, references, DOI) |
 | Data | db, sqlite, sql, csv, json, yaml, yml |
+| Installers | dmg, pkg, exe, msi, deb, rpm, appimage |
+
+**Content-based detection** analyzes PDF text to identify:
+- **Books**: ISBN patterns, chapter/preface/bibliography keywords
+- **Papers**: DOI patterns, abstract/references/citations, "et al." mentions
+- **Invoices**: Invoice/receipt keywords in 6 languages
+- **Archive books**: ZIP files containing .epub, .mobi, or .pdf files
 
 ## Configuration
 
 ### Directory Structure
 
-Tidy stores its configuration and logs in `~/.tidy/`:
+TidyUp stores its configuration and logs in `~/.tidy/`:
 
 ```
 ~/.tidy/
-├── config.yaml      # Configuration file (optional)
+├── config.yaml      # Category configuration
 └── logs/            # Operation logs
     ├── 2024-12-01_143052.json
     ├── 2024-12-02_091523.json
     └── ...
+```
+
+### Category Configuration
+
+Categories are stored in `~/.tidy/config.yaml`:
+
+```yaml
+categories:
+  - Documents
+  - Screenshots
+  - Images
+  - Videos
+  - Audio
+  - Archives
+  - Code
+  - Books
+  - Papers
+  - Data
+  - Installers
+```
+
+The order in the config determines the folder numbers (01, 02, 03...). The special "Unsorted" category is always 99.
+
+### Managing Categories
+
+```bash
+# List current categories
+tidyup categories list
+
+# Add a new category
+tidyup categories add Music              # Adds at the end
+tidyup categories add Music --position 5 # Adds at position 5
+
+# Remove a category
+tidyup categories remove Music
+
+# Apply changes to existing folders
+tidyup categories apply ~/Documents/Organized --dry-run  # Preview
+tidyup categories apply ~/Documents/Organized            # Rename folders
 ```
 
 ### Log Format

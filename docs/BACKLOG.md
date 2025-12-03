@@ -324,86 +324,86 @@ This document tracks all implementation tasks with story points, dependencies, a
 
 ---
 
-## Phase 4.5: Content-Based Enhancements 🔲 Planned
+## Phase 4.5: Content-Based Enhancements ✅ Complete
 
-### 4.5.0 Dynamic Category Management (Foundation)
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 4.5.0.1 | Create `Category` dataclass with number, name fields | 1 | Todo |
-| 4.5.0.2 | Create `CategoryManager` class with load/save methods | 3 | Todo |
-| 4.5.0.3 | Implement `add()` - add category at position, renumber others | 2 | Todo |
-| 4.5.0.4 | Implement `remove()` - remove category (must be empty) | 2 | Todo |
-| 4.5.0.5 | Implement `reorder()` - reorder categories by name list | 2 | Todo |
-| 4.5.0.6 | Implement `get_folder_name()` - return `NN_Name` format | 1 | Todo |
-| 4.5.0.7 | Implement `apply_to_filesystem()` - rename folders on disk | 3 | Todo |
-| 4.5.0.8 | Add YAML config support for categories in `~/.tidy/config.yaml` | 2 | Todo |
-| 4.5.0.9 | Add `tidyup categories` CLI subcommand group | 2 | Todo |
-| 4.5.0.10 | Add `tidyup categories list` - show current categories | 1 | Todo |
-| 4.5.0.11 | Add `tidyup categories add <name> --position N` | 2 | Todo |
-| 4.5.0.12 | Add `tidyup categories remove <name>` | 2 | Todo |
-| 4.5.0.13 | Migrate `operations.py` to use CategoryManager | 3 | Todo |
-| 4.5.0.14 | Update all detectors to use category names (not hardcoded strings) | 3 | Todo |
-| 4.5.0.15 | CategoryManager tests | 5 | Todo |
-
-### 4.5.1 Screenshots Category
+### 4.5.0 Dynamic Category Management (Foundation) ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 4.5.1.1 | Add "Screenshots" to default categories (position 2) | 1 | Todo |
-| 4.5.1.2 | Update `ScreenshotDetector` to return category "Screenshots" | 1 | Todo |
-| 4.5.1.3 | Update screenshot tests for new category | 1 | Todo |
+| 4.5.0.1 | Create `Category` dataclass with number, name fields | 1 | ✅ Done |
+| 4.5.0.2 | Create `CategoryManager` class with load/save methods | 3 | ✅ Done |
+| 4.5.0.3 | Implement `add()` - add category at position, renumber others | 2 | ✅ Done |
+| 4.5.0.4 | Implement `remove()` - remove category (must be empty) | 2 | ✅ Done |
+| 4.5.0.5 | Implement `reorder()` - reorder categories by name list | 2 | ✅ Done |
+| 4.5.0.6 | Implement `get_folder_name()` - return `NN_Name` format | 1 | ✅ Done |
+| 4.5.0.7 | Implement `apply_to_filesystem()` - rename folders on disk | 3 | ✅ Done |
+| 4.5.0.8 | Add YAML config support for categories in `~/.tidy/config.yaml` | 2 | ✅ Done |
+| 4.5.0.9 | Add `tidyup categories` CLI subcommand group | 2 | ✅ Done |
+| 4.5.0.10 | Add `tidyup categories list` - show current categories | 1 | ✅ Done |
+| 4.5.0.11 | Add `tidyup categories add <name> --position N` | 2 | ✅ Done |
+| 4.5.0.12 | Add `tidyup categories remove <name>` | 2 | ✅ Done |
+| 4.5.0.13 | Migrate `operations.py` to use CategoryManager | 3 | ✅ Done |
+| 4.5.0.14 | Update all detectors to use category names (not hardcoded strings) | 3 | ✅ Done |
+| 4.5.0.15 | CategoryManager tests | 5 | ✅ Done |
 
-### 4.5.2 Papers Category
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 4.5.2.1 | Add "Papers" to default categories (position 9) | 1 | Todo |
-| 4.5.2.2 | Update `ArxivDetector` to return category "Papers" | 1 | Todo |
-| 4.5.2.3 | Create `PaperDetector` (priority 12) for non-arXiv papers | 3 | Todo |
-| 4.5.2.4 | Paper keywords: abstract, references, citations, et al., DOI | 2 | Todo |
-| 4.5.2.5 | Register `PaperDetector` in registry | 1 | Todo |
-| 4.5.2.6 | Paper detector tests | 3 | Todo |
-
-### 4.5.3 Enhanced Book Detection
-
-| ID | Task | Points | Status |
-|----|------|--------|--------|
-| 4.5.3.1 | Create `ArchiveBookDetector` (priority 18) | 3 | Todo |
-| 4.5.3.2 | ZIP content inspection for ebook files (.epub, .mobi, .pdf) | 2 | Todo |
-| 4.5.3.3 | Filename heuristics for RAR/7z (edition, handbook, etc.) | 2 | Todo |
-| 4.5.3.4 | Register `ArchiveBookDetector` in registry | 1 | Todo |
-| 4.5.3.5 | Archive book detector tests | 3 | Todo |
-
-### 4.5.4 Book Renamer
+### 4.5.1 Screenshots Category ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 4.5.4.1 | Create `BookRenamer` class | 2 | Todo |
-| 4.5.4.2 | Pattern: `{pub_year}_{title}_{author}.ext` | 1 | Todo |
-| 4.5.4.3 | PDF metadata extraction (title, author, date) | 2 | Todo |
-| 4.5.4.4 | EPUB OPF metadata extraction (dc:title, dc:creator, dc:date) | 3 | Todo |
-| 4.5.4.5 | Register `BookRenamer` for BookDetector and ArchiveBookDetector | 1 | Todo |
-| 4.5.4.6 | Book renamer tests | 3 | Todo |
+| 4.5.1.1 | Add "Screenshots" to default categories (position 2) | 1 | ✅ Done |
+| 4.5.1.2 | Update `ScreenshotDetector` to return category "Screenshots" | 1 | ✅ Done |
+| 4.5.1.3 | Update screenshot tests for new category | 1 | ✅ Done |
 
-### 4.5.5 Update Tests and Documentation
+### 4.5.2 Papers Category ✅
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 4.5.5.1 | Update all detector tests for new category names | 3 | Todo |
-| 4.5.5.2 | Update operations tests for CategoryManager | 2 | Todo |
-| 4.5.5.3 | Update README.md with new categories | 1 | Todo |
-| 4.5.5.4 | Update REQUIREMENTS.md with category management | 2 | Todo |
+| 4.5.2.1 | Add "Papers" to default categories (position 9) | 1 | ✅ Done |
+| 4.5.2.2 | Update `ArxivDetector` to return category "Papers" | 1 | ✅ Done |
+| 4.5.2.3 | Create `PaperDetector` (priority 12) for non-arXiv papers | 3 | ✅ Done |
+| 4.5.2.4 | Paper keywords: abstract, references, citations, et al., DOI | 2 | ✅ Done |
+| 4.5.2.5 | Register `PaperDetector` in registry | 1 | ✅ Done |
+| 4.5.2.6 | Paper detector tests | 3 | ✅ Done |
 
-**Phase 4.5 Acceptance Criteria:**
-- [ ] Categories stored in config, not hardcoded
-- [ ] Can add/remove/reorder categories via CLI
-- [ ] Filesystem folders renamed when categories change
-- [ ] Screenshots → separate 02_Screenshots category
-- [ ] Research papers → 09_Papers category
-- [ ] Archives containing ebooks → Books category
-- [ ] Books renamed with title/author from metadata
-- [ ] All tests pass
+### 4.5.3 Enhanced Book Detection ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 4.5.3.1 | Create `ArchiveBookDetector` (priority 18) | 3 | ✅ Done |
+| 4.5.3.2 | ZIP content inspection for ebook files (.epub, .mobi, .pdf) | 2 | ✅ Done |
+| 4.5.3.3 | Filename heuristics for RAR/7z (edition, handbook, etc.) | 2 | ✅ Done |
+| 4.5.3.4 | Register `ArchiveBookDetector` in registry | 1 | ✅ Done |
+| 4.5.3.5 | Archive book detector tests | 3 | ✅ Done |
+
+### 4.5.4 Book Renamer ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 4.5.4.1 | Create `BookRenamer` class | 2 | ✅ Done |
+| 4.5.4.2 | Pattern: `{pub_year}_{title}_{author}.ext` | 1 | ✅ Done |
+| 4.5.4.3 | PDF metadata extraction (title, author, date) | 2 | ✅ Done |
+| 4.5.4.4 | EPUB OPF metadata extraction (dc:title, dc:creator, dc:date) | 3 | ✅ Done |
+| 4.5.4.5 | Register `BookRenamer` for BookDetector and ArchiveBookDetector | 1 | ✅ Done |
+| 4.5.4.6 | Book renamer tests | 3 | ✅ Done |
+
+### 4.5.5 Update Tests and Documentation ✅
+
+| ID | Task | Points | Status |
+|----|------|--------|--------|
+| 4.5.5.1 | Update all detector tests for new category names | 3 | ✅ Done |
+| 4.5.5.2 | Update operations tests for CategoryManager | 2 | ✅ Done |
+| 4.5.5.3 | Update README.md with new categories | 1 | ✅ Done |
+| 4.5.5.4 | Update REQUIREMENTS.md with category management | 2 | Skipped |
+
+**Phase 4.5 Acceptance Criteria:** ✅ All met
+- [x] Categories stored in config, not hardcoded
+- [x] Can add/remove/reorder categories via CLI
+- [x] Filesystem folders renamed when categories change
+- [x] Screenshots → separate 02_Screenshots category
+- [x] Research papers → 09_Papers category
+- [x] Archives containing ebooks → Books category
+- [x] Books renamed with title/author from metadata
+- [x] All tests pass (321 tests)
 
 **New Detectors:**
 - PaperDetector (priority=12) → Papers
@@ -497,10 +497,10 @@ This document tracks all implementation tasks with story points, dependencies, a
 | 2.5 Documentation | ✅ Complete | - |
 | 3. Detectors | ✅ Complete | 71 |
 | 4. Renamers | ✅ Complete | 22 |
-| 4.5 Content-Based Enhancements | 🔲 Planned | - |
+| 4.5 Content-Based Enhancements | ✅ Complete | 80 |
 | 5. Safety & Polish | 🟡 Partial | - |
 | 6. Quality & Release | 🟡 Partial | - |
-| **Total** | | **241 tests** |
+| **Total** | | **321 tests** |
 
 ---
 
