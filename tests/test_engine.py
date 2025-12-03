@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from tidyup.engine import Engine, EXTENSION_CATEGORIES
+from tidyup.engine import Engine
 from tidyup.models import FileInfo
 
 
@@ -289,23 +289,3 @@ class TestEngineRun:
         assert (dest / "01_Documents").is_dir()
 
 
-class TestExtensionCategories:
-    """Tests for the extension category mapping."""
-
-    def test_all_categories_exist(self) -> None:
-        """All mapped categories exist in folder structure."""
-        from tidyup.operations import DEFAULT_FOLDERS
-
-        folder_names = {f["name"] for f in DEFAULT_FOLDERS}
-        folder_numbers = {f["number"] for f in DEFAULT_FOLDERS}
-
-        for ext, (category, _) in EXTENSION_CATEGORIES.items():
-            number = int(category.split("_")[0])
-            name = category.split("_")[1]
-
-            assert number in folder_numbers, f"Category {category} number not in folders"
-
-    def test_confidence_values_valid(self) -> None:
-        """All confidence values are between 0 and 1."""
-        for ext, (_, confidence) in EXTENSION_CATEGORIES.items():
-            assert 0.0 <= confidence <= 1.0, f"Invalid confidence for .{ext}"

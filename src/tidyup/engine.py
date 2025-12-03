@@ -7,6 +7,7 @@ file discovery, detection, renaming, moving, and logging.
 from pathlib import Path
 from typing import Optional
 
+from .detectors import get_registry
 from .discovery import discover_files
 from .logger import ActionLogger
 from .models import Action, DetectionResult, FileInfo, RenameResult, RunResult
@@ -19,79 +20,6 @@ from .operations import (
     safe_rename,
 )
 from .utils import format_date, is_ugly_filename, sanitize_filename
-
-
-# Simple extension-based category mapping (placeholder until detectors are implemented)
-EXTENSION_CATEGORIES = {
-    # Documents
-    "pdf": ("01_Documents", 0.9),
-    "doc": ("01_Documents", 0.9),
-    "docx": ("01_Documents", 0.9),
-    "txt": ("01_Documents", 0.8),
-    "rtf": ("01_Documents", 0.8),
-    "odt": ("01_Documents", 0.8),
-    "xls": ("01_Documents", 0.8),
-    "xlsx": ("01_Documents", 0.8),
-    "ppt": ("01_Documents", 0.8),
-    "pptx": ("01_Documents", 0.8),
-    "csv": ("01_Documents", 0.7),
-    # Images
-    "jpg": ("02_Images", 0.95),
-    "jpeg": ("02_Images", 0.95),
-    "png": ("02_Images", 0.95),
-    "gif": ("02_Images", 0.95),
-    "bmp": ("02_Images", 0.9),
-    "webp": ("02_Images", 0.9),
-    "svg": ("02_Images", 0.85),
-    "heic": ("02_Images", 0.95),
-    "heif": ("02_Images", 0.95),
-    # Videos
-    "mp4": ("03_Videos", 0.95),
-    "mov": ("03_Videos", 0.95),
-    "avi": ("03_Videos", 0.9),
-    "mkv": ("03_Videos", 0.9),
-    "wmv": ("03_Videos", 0.9),
-    "webm": ("03_Videos", 0.9),
-    # Audio
-    "mp3": ("04_Audio", 0.95),
-    "wav": ("04_Audio", 0.9),
-    "flac": ("04_Audio", 0.9),
-    "aac": ("04_Audio", 0.9),
-    "ogg": ("04_Audio", 0.85),
-    "m4a": ("04_Audio", 0.9),
-    # Archives
-    "zip": ("05_Archives", 0.9),
-    "rar": ("05_Archives", 0.9),
-    "7z": ("05_Archives", 0.9),
-    "tar": ("05_Archives", 0.9),
-    "gz": ("05_Archives", 0.85),
-    "bz2": ("05_Archives", 0.85),
-    # Code
-    "py": ("06_Code", 0.9),
-    "js": ("06_Code", 0.9),
-    "ts": ("06_Code", 0.9),
-    "java": ("06_Code", 0.9),
-    "c": ("06_Code", 0.9),
-    "cpp": ("06_Code", 0.9),
-    "h": ("06_Code", 0.85),
-    "go": ("06_Code", 0.9),
-    "rs": ("06_Code", 0.9),
-    "rb": ("06_Code", 0.9),
-    "html": ("06_Code", 0.8),
-    "css": ("06_Code", 0.8),
-    "json": ("06_Code", 0.7),
-    "yaml": ("06_Code", 0.7),
-    "yml": ("06_Code", 0.7),
-    # Books
-    "epub": ("07_Books", 0.95),
-    "mobi": ("07_Books", 0.95),
-    "azw": ("07_Books", 0.9),
-    "azw3": ("07_Books", 0.9),
-    # Data
-    "db": ("08_Data", 0.8),
-    "sqlite": ("08_Data", 0.85),
-    "sql": ("08_Data", 0.8),
-}
 
 
 class Engine:
@@ -146,8 +74,8 @@ class Engine:
     def detect_category(self, file: FileInfo) -> DetectionResult:
         """Detect the category for a file.
 
-        Uses simple extension-based detection as a placeholder
-        until the full detector framework is implemented.
+        Uses the detector registry to run all registered detectors
+        and return the best result.
 
         Args:
             file: FileInfo for the file to detect.
@@ -155,23 +83,8 @@ class Engine:
         Returns:
             DetectionResult with category and confidence.
         """
-        ext = file.extension.lower()
-
-        if ext in EXTENSION_CATEGORIES:
-            category, confidence = EXTENSION_CATEGORIES[ext]
-            return DetectionResult(
-                category=category,
-                confidence=confidence,
-                detector_name="ExtensionDetector",
-            )
-
-        # Unknown extension
-        return DetectionResult(
-            category="99_Unsorted",
-            confidence=0.3,
-            detector_name="ExtensionDetector",
-            reason=f"Unknown extension: .{ext}" if ext else "No file extension",
-        )
+        registry = get_registry()
+        return registry.detect(file)
 
     def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> Optional[RenameResult]:
         """Generate a new filename for a file.
