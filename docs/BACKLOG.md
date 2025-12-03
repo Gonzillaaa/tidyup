@@ -545,34 +545,34 @@ Enable users to create custom categories that actually receive files through con
 - [x] Rules evaluated after detector, before folder lookup
 - [x] Multiple rules can match; first match wins
 
-### 7.3 Level 3a: Smart Defaults (Static Dictionary)
+### 7.3 Level 3a: Smart Defaults (Static Dictionary) ✅ Complete
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 7.3.1 | Create `src/tidyup/suggestions.py` | 2 | 🔲 Todo |
-| 7.3.2 | Build CATEGORY_SUGGESTIONS dictionary (~50 patterns) | 5 | 🔲 Todo |
-| 7.3.3 | Build PARENT_INFERENCE dictionary | 2 | 🔲 Todo |
-| 7.3.4 | Implement `suggest_rules(category_name)` function | 2 | 🔲 Todo |
-| 7.3.5 | Integrate suggestions into `categories add` CLI | 3 | 🔲 Todo |
-| 7.3.6 | Add `--no-suggestions` flag to skip suggestions | 1 | 🔲 Todo |
-| 7.3.7 | Add interactive accept/edit/skip for suggestions | 3 | 🔲 Todo |
-| 7.3.8 | Write suggestions tests | 3 | 🔲 Todo |
-| 7.3.9 | Update USER_GUIDE.md with suggestions docs | 2 | 🔲 Todo |
+| 7.3.1 | Create `src/tidyup/suggestions.py` | 2 | ✅ Done |
+| 7.3.2 | Build CATEGORY_SUGGESTIONS dictionary (~50 patterns) | 5 | ✅ Done (~100 patterns) |
+| 7.3.3 | Build PARENT_INFERENCE dictionary | 2 | ✅ Done |
+| 7.3.4 | Implement `suggest_rules(category_name)` function | 2 | ✅ Done |
+| 7.3.5 | Integrate suggestions into `categories add` CLI | 3 | ✅ Done |
+| 7.3.6 | Add `--no-suggestions` flag to skip suggestions | 1 | ✅ Done |
+| 7.3.7 | Add interactive accept/edit/skip for suggestions | 3 | ✅ Done (accept/skip) |
+| 7.3.8 | Write suggestions tests | 3 | ✅ Done |
+| 7.3.9 | Update USER_GUIDE.md with suggestions docs | 2 | ✅ Done |
 
 **Dictionary coverage targets:**
-- [ ] Programming/Tech: programming, software, code, developer, api
-- [ ] Design: design, figma, sketch, photoshop, illustrator, ui, ux
-- [ ] Finance: invoice, receipt, bill, payment, bank, tax
-- [ ] Work: project, client, meeting, report, presentation
-- [ ] Personal: family, vacation, photo, birthday
-- [ ] Academic: paper, research, thesis, journal, arxiv
-- [ ] Media: photo, video, music, podcast
-- [ ] Legal: contract, agreement, legal, attorney
+- [x] Programming/Tech: programming, software, code, developer, api
+- [x] Design: design, figma, sketch, photoshop, illustrator, ui, ux
+- [x] Finance: invoice, receipt, bill, payment, bank, tax
+- [x] Work: project, client, meeting, report, presentation
+- [x] Personal: family, vacation, photo, birthday
+- [x] Academic: paper, research, thesis, journal, arxiv
+- [x] Media: photo, video, music, podcast
+- [x] Legal: contract, agreement, legal, attorney
 
 **Acceptance Criteria:**
-- [ ] `tidyup categories add "Technical Books"` suggests keywords
-- [ ] User can accept, edit, or skip suggestions
-- [ ] Dictionary covers common use cases for various professions
+- [x] `tidyup categories add "Technical Books"` suggests keywords
+- [x] User can accept or skip suggestions
+- [x] Dictionary covers common use cases for various professions
 
 ### 7.4 Integration and Polish
 

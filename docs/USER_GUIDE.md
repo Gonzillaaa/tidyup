@@ -42,10 +42,11 @@ tidyup <source> [destination]
 | `tidyup status` | Show configuration paths *(full statistics coming soon)* |
 | `tidyup categories` | List all configured categories |
 | `tidyup categories list` | Same as above |
-| `tidyup categories add <name>` | Add a new category |
+| `tidyup categories add <name>` | Add a new category (with suggestions) |
 | `tidyup categories add <name> --parent <cat>` | Add as subcategory |
 | `tidyup categories add <name> --keywords "kw1,kw2"` | Add with keyword rules |
 | `tidyup categories add <name> --patterns "pat1,pat2"` | Add with pattern rules |
+| `tidyup categories add <name> --no-suggestions` | Add without auto-suggestions |
 | `tidyup categories remove <name>` | Remove a category |
 | `tidyup categories apply <path>` | Rename folders to match current config |
 | `tidyup routing` | List all routing rules |
@@ -91,6 +92,37 @@ tidyup categories add Music
 
 # Add at specific position (becomes 05_Music)
 tidyup categories add Music --position 5
+```
+
+### Smart Suggestions
+
+When you add a category without explicit rules, TidyUp automatically suggests keywords and parent categories based on the name:
+
+```bash
+$ tidyup categories add "Technical Books"
+
+Suggestions based on category name:
+  Parent: Books
+  Keywords: api, chapter, code, developer, edition, framework, isbn, programming
+
+Accept these suggestions? [Y/n]
+```
+
+Press Enter to accept, or `n` to add without rules.
+
+**Supported patterns include:**
+- **Tech**: programming, software, code, developer, api
+- **Finance**: invoice, receipt, bill, payment, tax
+- **Books**: fiction, nonfiction, novel, textbook, manual
+- **Work**: project, client, meeting, report, presentation
+- **Academic**: paper, research, thesis, journal, study
+- **Media**: photo, video, music, podcast
+- And many more (~100 patterns)
+
+To skip suggestions entirely:
+
+```bash
+tidyup categories add "Random Category" --no-suggestions
 ```
 
 ### Removing a Category

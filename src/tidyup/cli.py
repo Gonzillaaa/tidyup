@@ -272,42 +272,86 @@ def categories_list() -> None:
     "--patterns",
     help="Comma-separated filename patterns (e.g., 'acme_*,*_project_*')",
 )
+@click.option(
+    "--no-suggestions",
+    is_flag=True,
+    help="Skip automatic keyword/parent suggestions",
+)
 def categories_add(
     name: str,
     position: int | None,
     parent: str | None,
     keywords: str | None,
     patterns: str | None,
+    no_suggestions: bool,
 ) -> None:
     """Add a new category.
+
+    When adding a category without explicit rules, TidyUp will suggest
+    keywords and parent categories based on the name. Use --no-suggestions
+    to skip this.
 
     \\b
     Examples:
         tidyup categories add Invoices
         tidyup categories add "Technical Books" --parent Books --keywords "programming,software,code"
         tidyup categories add "Client Work" --patterns "acme_*,techcorp_*"
+        tidyup categories add "Random" --no-suggestions
     """
     from rich.console import Console
 
     from .categories import get_category_manager
     from .rules import CategoryRule
+    from .suggestions import suggest_rules
 
     console = Console()
     manager = get_category_manager()
 
-    # Build rules if any options provided
+    # Check for suggestions if no rules explicitly provided
+    final_parent = parent
+    final_keywords: list[str] = []
+    final_patterns: list[str] = []
+
+    if keywords:
+        final_keywords = [k.strip() for k in keywords.split(",")]
+    if patterns:
+        final_patterns = [p.strip() for p in patterns.split(",")]
+
+    # Offer suggestions if no rules provided and not disabled
+    if not no_suggestions and not keywords and not patterns and not parent:
+        suggestion = suggest_rules(name)
+        if suggestion.has_suggestions:
+            console.print()
+            console.print("[bold]Suggestions based on category name:[/bold]")
+
+            if suggestion.parent:
+                console.print(f"  Parent: [yellow]{suggestion.parent}[/yellow]")
+            if suggestion.keywords:
+                kw_display = ", ".join(suggestion.keywords[:8])
+                if len(suggestion.keywords) > 8:
+                    kw_display += f" (+{len(suggestion.keywords) - 8} more)"
+                console.print(f"  Keywords: [cyan]{kw_display}[/cyan]")
+
+            console.print()
+
+            # Ask user if they want to accept suggestions
+            if click.confirm("Accept these suggestions?", default=True):
+                final_parent = suggestion.parent
+                final_keywords = suggestion.keywords
+            else:
+                console.print("[dim]Suggestions skipped. Adding category without rules.[/dim]")
+
+    # Build rules if any keywords or patterns
     rules = None
-    if keywords or patterns:
-        kw_list = [k.strip() for k in keywords.split(",")] if keywords else []
-        pattern_list = [p.strip() for p in patterns.split(",")] if patterns else []
-        rules = CategoryRule(keywords=kw_list, patterns=pattern_list)
+    if final_keywords or final_patterns:
+        rules = CategoryRule(keywords=final_keywords, patterns=final_patterns)
 
     try:
-        category = manager.add(name, position, parent=parent, rules=rules)
+        category = manager.add(name, position, parent=final_parent, rules=rules)
         manager.save()
         console.print(f"[green]Added category:[/green] {category.folder_name}")
-        if parent:
-            console.print(f"[dim]Parent: {parent}[/dim]")
+        if final_parent:
+            console.print(f"[dim]Parent: {final_parent}[/dim]")
         if rules:
             if rules.keywords:
                 console.print(f"[dim]Keywords: {', '.join(rules.keywords)}[/dim]")
