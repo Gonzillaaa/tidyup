@@ -403,7 +403,7 @@ This document tracks all implementation tasks with story points, dependencies, a
 - [x] Research papers → 09_Papers category
 - [x] Archives containing ebooks → Books category
 - [x] Books renamed with title/author from metadata
-- [x] All tests pass (321 tests)
+- [x] All tests pass (323 tests)
 
 **New Detectors:**
 - PaperDetector (priority=12) → Papers
@@ -503,7 +503,7 @@ This document tracks all implementation tasks with story points, dependencies, a
 | 4.5 Content-Based Enhancements | ✅ Complete | 80 |
 | 5. Safety & Polish | 🟡 Partial | - |
 | 6. Quality & Release | 🟡 Partial | - |
-| **Total** | | **321 tests** |
+| **Total** | | **323 tests** |
 
 ---
 
