@@ -124,33 +124,70 @@ def run_organize(source: Path, destination: Path | None, options: dict) -> None:
 
     console.print()
 
-    # Run the engine
+    # Run the engine with progress bar for non-dry-run
     engine = Engine(source, destination=destination, options=options)
-    result = engine.run()
+
+    if options.get("dry_run"):
+        # Dry run: no progress bar, just run
+        result = engine.run()
+    else:
+        # Live run: show progress bar
+        from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+            transient=True,
+        ) as progress:
+            # We don't know total files ahead of time, so use indeterminate
+            task = progress.add_task("Processing files...", total=None)
+            result = engine.run()
+            progress.update(task, completed=result.summary.processed)
 
     # Display results
     if options.get("verbose") or options.get("dry_run"):
         # Show individual actions
         if result.actions:
-            table = Table(title="Actions")
+            table = Table(title="Actions" if not options.get("dry_run") else "Dry Run Preview")
             table.add_column("File", style="cyan")
-            table.add_column("Category", style="green")
-            table.add_column("Status", style="yellow")
+            table.add_column("Category")
+            table.add_column("Status")
             table.add_column("Destination")
+
+            # Category colors for visual grouping
+            category_colors = {
+                "Documents": "blue",
+                "Screenshots": "magenta",
+                "Images": "green",
+                "Videos": "red",
+                "Audio": "yellow",
+                "Archives": "cyan",
+                "Code": "bright_green",
+                "Books": "bright_blue",
+                "Papers": "bright_cyan",
+                "Data": "bright_yellow",
+                "Installers": "bright_red",
+                "Unsorted": "dim",
+            }
 
             for action in result.actions:
                 status_style = {
                     "success": "green",
-                    "error": "red",
+                    "error": "red bold",
                     "skipped": "dim",
                 }.get(action.status, "white")
+
+                cat_color = category_colors.get(action.detection.category, "white")
 
                 # Show actual destination: parent folder + filename
                 dest_display = f"{action.dest_path.parent.name}/{action.dest_path.name}"
 
                 table.add_row(
                     action.file.name,
-                    action.detection.category,
+                    f"[{cat_color}]{action.detection.category}[/{cat_color}]",
                     f"[{status_style}]{action.status}[/{status_style}]",
                     dest_display,
                 )
