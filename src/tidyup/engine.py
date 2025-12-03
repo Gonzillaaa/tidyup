@@ -1,4 +1,4 @@
-"""Core engine for Tidy.
+"""Core engine for TidyUp.
 
 This module contains the main orchestration logic that ties together
 file discovery, detection, renaming, moving, and logging.
@@ -7,13 +7,14 @@ file discovery, detection, renaming, moving, and logging.
 from pathlib import Path
 from typing import Optional
 
+from .categories import get_category_manager
 from .detectors import get_registry
 from .discovery import discover_files
 from .logger import ActionLogger
 from .models import Action, DetectionResult, FileInfo, RenameResult, RunResult
 from .operations import (
-    DEFAULT_FOLDERS,
     ensure_dest_structure,
+    get_default_folders,
     is_duplicate,
     move_to_duplicates,
     safe_move,
@@ -86,6 +87,22 @@ class Engine:
         registry = get_registry()
         return registry.detect(file)
 
+    def _get_folder_name(self, category: str) -> str:
+        """Convert a category name to its folder name.
+
+        Args:
+            category: Category name (e.g., "Documents", "Screenshots").
+
+        Returns:
+            Folder name (e.g., "01_Documents", "02_Screenshots").
+        """
+        manager = get_category_manager()
+        try:
+            return manager.get_folder_name(category)
+        except ValueError:
+            # Unknown category falls back to Unsorted
+            return manager.get_folder_name("Unsorted")
+
     def generate_new_name(self, file: FileInfo, detection: DetectionResult) -> Optional[RenameResult]:
         """Generate a new filename for a file.
 
@@ -146,12 +163,14 @@ class Engine:
             # Rename in place
             dest_path = file.path.parent / final_name
         else:
-            # Move to destination
-            dest_path = self.destination / detection.category / final_name
+            # Move to destination (resolve category name to folder name)
+            folder_name = self._get_folder_name(detection.category)
+            dest_path = self.destination / folder_name / final_name
 
         # Step 6: Check for duplicates (only when moving)
         if not self.rename_only and self.destination:
-            dest_folder = self.destination / detection.category
+            folder_name = self._get_folder_name(detection.category)
+            dest_folder = self.destination / folder_name
             if dest_folder.exists():
                 existing = is_duplicate(file.path, dest_folder)
                 if existing:
@@ -160,7 +179,8 @@ class Engine:
                     if not self.dry_run:
                         final_path = move_to_duplicates(file.path, self.destination)
                     else:
-                        final_path = self.destination / "99_Unsorted" / "_duplicates" / file.name
+                        unsorted_folder = self._get_folder_name("Unsorted")
+                        final_path = self.destination / unsorted_folder / "_duplicates" / file.name
 
                     action = Action(
                         file=file,
@@ -218,7 +238,7 @@ class Engine:
         """
         # Ensure destination structure exists (unless dry-run or rename-only)
         if not self.rename_only and self.destination and not self.dry_run:
-            ensure_dest_structure(self.destination, DEFAULT_FOLDERS)
+            ensure_dest_structure(self.destination, get_default_folders())
 
         # Create logger
         logger = ActionLogger(

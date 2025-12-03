@@ -1,4 +1,4 @@
-"""File operations for Tidy.
+"""File operations for TidyUp.
 
 This module handles safe file moves, renames, and duplicate detection.
 All operations are designed to never lose data.
@@ -165,16 +165,31 @@ def move_to_duplicates(file: Path, dest: Path) -> Path:
     return safe_move(file, dest_path)
 
 
-# Default folder structure for tidy
+# Default folder structure for tidy (loaded from CategoryManager)
+def get_default_folders() -> list[dict]:
+    """Get default folder structure from CategoryManager.
+
+    Returns:
+        List of folder configs with 'number' and 'name' keys.
+    """
+    from .categories import get_category_manager
+
+    return get_category_manager().get_default_folders()
+
+
+# Legacy constant for backwards compatibility
+# Note: This is evaluated at import time with default categories
 DEFAULT_FOLDERS = [
     {"number": 1, "name": "Documents"},
-    {"number": 2, "name": "Images"},
-    {"number": 3, "name": "Videos"},
-    {"number": 4, "name": "Audio"},
-    {"number": 5, "name": "Archives"},
-    {"number": 6, "name": "Code"},
-    {"number": 7, "name": "Books"},
-    {"number": 8, "name": "Data"},
-    {"number": 9, "name": "Installers"},
+    {"number": 2, "name": "Screenshots"},
+    {"number": 3, "name": "Images"},
+    {"number": 4, "name": "Videos"},
+    {"number": 5, "name": "Audio"},
+    {"number": 6, "name": "Archives"},
+    {"number": 7, "name": "Code"},
+    {"number": 8, "name": "Books"},
+    {"number": 9, "name": "Papers"},
+    {"number": 10, "name": "Data"},
+    {"number": 11, "name": "Installers"},
     {"number": 99, "name": "Unsorted"},
 ]
