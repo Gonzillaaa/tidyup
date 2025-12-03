@@ -522,28 +522,28 @@ Enable users to create custom categories that actually receive files through con
 - [x] Remap persists in config.yaml
 - [x] CLI commands work for list/set/remove
 
-### 7.2 Level 2: Config-Based Rules
+### 7.2 Level 2: Config-Based Rules ✅ Complete
 
 | ID | Task | Points | Status |
 |----|------|--------|--------|
-| 7.2.1 | Create `src/tidyup/rules.py` with `CategoryRule` dataclass | 3 | 🔲 Todo |
-| 7.2.2 | Implement keyword matching (filename + content) | 3 | 🔲 Todo |
-| 7.2.3 | Implement glob pattern matching for filenames | 2 | 🔲 Todo |
-| 7.2.4 | Implement extension matching | 1 | 🔲 Todo |
-| 7.2.5 | Add `parent` field to Category for subcategorization | 2 | 🔲 Todo |
-| 7.2.6 | Add `rules` field to Category dataclass | 2 | 🔲 Todo |
-| 7.2.7 | Integrate rules engine into engine.py | 3 | 🔲 Todo |
-| 7.2.8 | Update config schema for category rules | 2 | 🔲 Todo |
-| 7.2.9 | Add `--keywords` and `--parent` to `categories add` | 2 | 🔲 Todo |
-| 7.2.10 | Add `--patterns` to `categories add` | 1 | 🔲 Todo |
-| 7.2.11 | Write rules engine tests | 5 | 🔲 Todo |
-| 7.2.12 | Update USER_GUIDE.md with rules docs | 2 | 🔲 Todo |
+| 7.2.1 | Create `src/tidyup/rules.py` with `CategoryRule` dataclass | 3 | ✅ Done |
+| 7.2.2 | Implement keyword matching (filename + content) | 3 | ✅ Done |
+| 7.2.3 | Implement glob pattern matching for filenames | 2 | ✅ Done |
+| 7.2.4 | Implement extension matching | 1 | ✅ Done |
+| 7.2.5 | Add `parent` field to Category for subcategorization | 2 | ✅ Done |
+| 7.2.6 | Add `rules` field to Category dataclass | 2 | ✅ Done |
+| 7.2.7 | Integrate rules engine into engine.py | 3 | ✅ Done |
+| 7.2.8 | Update config schema for category rules | 2 | ✅ Done |
+| 7.2.9 | Add `--keywords` and `--parent` to `categories add` | 2 | ✅ Done |
+| 7.2.10 | Add `--patterns` to `categories add` | 1 | ✅ Done |
+| 7.2.11 | Write rules engine tests | 5 | ✅ Done |
+| 7.2.12 | Update USER_GUIDE.md with rules docs | 2 | ✅ Done |
 
 **Acceptance Criteria:**
-- [ ] Can create "Technical Books" as subcategory of "Books" with keywords
-- [ ] Can create "Client Work" with filename patterns
-- [ ] Rules evaluated after detector, before folder lookup
-- [ ] Multiple rules can match; first match wins
+- [x] Can create "Technical Books" as subcategory of "Books" with keywords
+- [x] Can create "Client Work" with filename patterns
+- [x] Rules evaluated after detector, before folder lookup
+- [x] Multiple rules can match; first match wins
 
 ### 7.3 Level 3a: Smart Defaults (Static Dictionary)
 
