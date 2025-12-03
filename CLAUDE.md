@@ -1,4 +1,8 @@
-# Claude Code Directives for Tidy
+# Claude Code Directives for TidyUp
+
+## CRITICAL: Commit After Each Unit of Work
+
+**Make atomic git commits as you work, not at the end.** After implementing each logical unit (a new class, a detector, a feature) and tests pass, commit immediately. Do not batch changes.
 
 ## Project Overview
 
