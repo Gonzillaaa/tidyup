@@ -136,10 +136,11 @@ def get_file_dates(path: Path) -> tuple[datetime, datetime]:
     modified = datetime.fromtimestamp(stat.st_mtime)
 
     # st_birthtime is macOS-specific, st_ctime is creation on Windows
-    # but inode change time on Unix
-    try:
-        created = datetime.fromtimestamp(stat.st_birthtime)
-    except AttributeError:
+    # but inode change time on Unix. Use getattr for cross-platform compatibility.
+    birthtime = getattr(stat, "st_birthtime", None)
+    if birthtime is not None:
+        created = datetime.fromtimestamp(birthtime)
+    else:
         # Fall back to ctime (which is inode change time on Unix)
         created = datetime.fromtimestamp(stat.st_ctime)
 
