@@ -26,6 +26,8 @@ TidyUp is a CLI tool for organizing, renaming, and categorizing files. It uses a
 
 ## Key Documentation
 
+- **User Guide**: `docs/USER_GUIDE.md` - CLI reference, categories, troubleshooting
+- **Development**: `docs/DEVELOPMENT.md` - Setup, testing, adding detectors/renamers
 - **Requirements**: `docs/REQUIREMENTS.md` - Full specification
 - **Backlog**: `docs/BACKLOG.md` - Implementation tasks with story points
 
