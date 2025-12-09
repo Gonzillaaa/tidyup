@@ -420,6 +420,106 @@ detection:
 
 ---
 
+## Configurable Routing (Planned - Phase 7)
+
+Allow users to customize how files are routed to categories beyond the built-in detectors.
+
+### Problem
+
+When users create custom categories (e.g., `tidyup categories add PDF`), no files route there because:
+- Detectors return hardcoded category names
+- There's no bridge between user-defined categories and detection logic
+
+### Solution: Three-Level Approach
+
+#### Level 1: Category Remapping
+
+Redirect detector outputs to different categories:
+
+```yaml
+routing:
+  remap:
+    # Global remap: all Documents → PDF
+    Documents: PDF
+
+    # Detector-specific remap: only invoices → Receipts
+    InvoiceDetector:
+      Documents: Receipts
+```
+
+**Use cases:**
+- Rename default categories (Documents → Paperwork)
+- Redirect specific detections (invoices → Receipts folder)
+
+#### Level 2: Config-Based Rules
+
+Categories can define matching rules for subcategorization:
+
+```yaml
+categories:
+  - name: Technical Books
+    parent: Books
+    rules:
+      keywords: [programming, software, algorithm, code]
+      patterns: ["*_programming_*"]
+
+  - name: Fiction
+    parent: Books
+    rules:
+      keywords: [novel, fiction, fantasy, romance]
+
+  - name: Client Work
+    rules:
+      patterns: ["acme_*", "techcorp_*"]
+      keywords: [client, proposal, project]
+```
+
+**How it works:**
+1. Detector chain runs, returns category (e.g., "Books")
+2. Rules engine checks for subcategories with matching rules
+3. If rules match, route to subcategory instead
+
+**Use cases:**
+- Split books into Technical vs Fiction
+- Create client-specific folders
+- Organize invoices by vendor
+
+#### Level 3: Smart Defaults
+
+When adding a category, suggest keywords based on name:
+
+```bash
+$ tidyup categories add "Technical Books"
+
+Detected: Subcategory of "Books"
+Suggested keywords: programming, software, code, developer, technical
+
+Accept these suggestions? [Y/n/edit]
+```
+
+### CLI Commands (Planned)
+
+```bash
+# Routing management
+tidyup routing list                              # Show current routing config
+tidyup routing set <detector> <from> <to>        # Add detector-specific remap
+tidyup routing remove <detector> <from>          # Remove remap
+
+# Enhanced category creation
+tidyup categories add "Technical Books"          # Interactive with suggestions
+tidyup categories add "Tech" --keywords "python,java" --parent Books  # Explicit
+tidyup categories add "PDF" --no-suggestions     # Skip suggestions
+```
+
+### Future: LLM-Powered Detection
+
+See [FUTURE_DIRECTIONS.md](FUTURE_DIRECTIONS.md) for planned AI/LLM integration that enables:
+- Semantic classification for novel categories
+- Natural language category descriptions
+- Handling ambiguous files intelligently
+
+---
+
 ## Unsorted Handling
 
 Files that can't be categorized go to `99_Unsorted/`.

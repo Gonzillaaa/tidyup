@@ -547,6 +547,94 @@ test_file_type_detection() {
     print_success "File type detection complete"
 }
 
+test_routing_commands() {
+    print_header "Test: Category Routing (Phase 7)"
+
+    print_test "Show current routing rules"
+    run_cmd "tidyup routing"
+
+    print_test "Set a global routing rule (Documents → Paperwork)"
+    run_cmd "tidyup categories add Paperwork" || true
+    run_cmd "tidyup routing set Documents Paperwork"
+
+    print_test "Show routing after setting"
+    run_cmd "tidyup routing"
+
+    print_test "Set detector-specific routing (InvoiceDetector → Invoices)"
+    run_cmd "tidyup categories add Invoices" || true
+    run_cmd "tidyup routing set Documents Invoices --detector InvoiceDetector"
+
+    print_test "Show all routing rules"
+    run_cmd "tidyup routing"
+
+    print_test "Clear detector-specific routing"
+    run_cmd "tidyup routing clear Documents --detector InvoiceDetector"
+
+    print_test "Clear global routing"
+    run_cmd "tidyup routing clear Documents"
+
+    print_test "Clean up test categories"
+    run_cmd "tidyup categories remove Paperwork" || true
+    run_cmd "tidyup categories remove Invoices" || true
+
+    print_success "Routing commands work"
+}
+
+test_subcategory_rules() {
+    print_header "Test: Subcategory Rules (Phase 7)"
+
+    print_test "Add subcategory with keyword rules"
+    run_cmd "tidyup categories add Technical --parent Books --keywords 'programming,software,code'"
+
+    print_test "List categories to see subcategory"
+    run_cmd "tidyup categories list"
+
+    print_test "Add subcategory with pattern rules"
+    run_cmd "tidyup categories add 'Acme Client' --parent Documents --patterns 'acme_*,*_acme_*'"
+
+    print_test "Test file matching with rules (dry-run)"
+    # Create test files that should match rules
+    local rules_source="$TEST_BASE/rules_test"
+    mkdir -p "$rules_source"
+    touch "$rules_source/programming_book.epub"
+    touch "$rules_source/acme_invoice.pdf"
+    touch "$rules_source/random_doc.pdf"
+
+    run_cmd "tidyup '$rules_source' '$TEST_DEST' --dry-run --verbose"
+
+    print_test "Clean up test categories"
+    run_cmd "tidyup categories remove Technical" || true
+    run_cmd "tidyup categories remove 'Acme Client'" || true
+
+    print_success "Subcategory rules work"
+}
+
+test_suggestions() {
+    print_header "Test: Smart Suggestions (Phase 7)"
+
+    print_test "Add category and see suggestions"
+    echo ""
+    print_info "When adding a new category, TidyUp suggests keywords and parent categories."
+    echo ""
+
+    # Note: suggestions are shown during interactive category add
+    # For automated testing, we just verify the command works
+    print_test "Add 'Technical Books' (should suggest parent=Books and keywords)"
+    run_cmd "tidyup categories add 'Technical Books'" || true
+
+    print_test "Add 'Client Invoices' (should suggest parent=Documents)"
+    run_cmd "tidyup categories add 'Client Invoices'" || true
+
+    print_test "List categories to see new ones"
+    run_cmd "tidyup categories list"
+
+    print_test "Clean up"
+    run_cmd "tidyup categories remove 'Technical Books'" || true
+    run_cmd "tidyup categories remove 'Client Invoices'" || true
+
+    print_success "Suggestions work"
+}
+
 test_edge_cases() {
     print_header "Test: Edge Cases"
 
@@ -675,6 +763,15 @@ main() {
     pause
 
     test_file_type_detection
+    pause
+
+    test_routing_commands
+    pause
+
+    test_subcategory_rules
+    pause
+
+    test_suggestions
     pause
 
     test_edge_cases

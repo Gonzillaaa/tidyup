@@ -350,13 +350,31 @@ def categories_list() -> None:
     console = Console()
     manager = get_category_manager()
 
+    # Check if any categories have rules
+    has_rules = any(cat.parent or cat.rules for cat in manager.categories)
+
     table = Table(title="Categories")
     table.add_column("#", style="dim", justify="right")
     table.add_column("Name", style="cyan")
     table.add_column("Folder", style="green")
+    if has_rules:
+        table.add_column("Parent", style="yellow")
+        table.add_column("Rules", style="dim")
 
     for cat in manager.categories:
-        table.add_row(str(cat.number), cat.name, cat.folder_name)
+        if has_rules:
+            parent_display = cat.parent or ""
+            rules_display = ""
+            if cat.rules:
+                parts = []
+                if cat.rules.keywords:
+                    parts.append(f"kw: {len(cat.rules.keywords)}")
+                if cat.rules.patterns:
+                    parts.append(f"pat: {len(cat.rules.patterns)}")
+                rules_display = ", ".join(parts)
+            table.add_row(str(cat.number), cat.name, cat.folder_name, parent_display, rules_display)
+        else:
+            table.add_row(str(cat.number), cat.name, cat.folder_name)
 
     console.print(table)
     console.print()
@@ -366,19 +384,100 @@ def categories_list() -> None:
 @categories.command(name="add")
 @click.argument("name")
 @click.option("--position", "-p", type=int, help="Position for the new category (1-based)")
-def categories_add(name: str, position: int | None) -> None:
-    """Add a new category."""
+@click.option("--parent", help="Parent category for subcategorization (e.g., Books)")
+@click.option(
+    "--keywords", "-k",
+    help="Comma-separated keywords for rule matching (e.g., 'programming,software,code')",
+)
+@click.option(
+    "--patterns",
+    help="Comma-separated filename patterns (e.g., 'acme_*,*_project_*')",
+)
+@click.option(
+    "--no-suggestions",
+    is_flag=True,
+    help="Skip automatic keyword/parent suggestions",
+)
+def categories_add(
+    name: str,
+    position: int | None,
+    parent: str | None,
+    keywords: str | None,
+    patterns: str | None,
+    no_suggestions: bool,
+) -> None:
+    """Add a new category.
+
+    When adding a category without explicit rules, TidyUp will suggest
+    keywords and parent categories based on the name. Use --no-suggestions
+    to skip this.
+
+    \\b
+    Examples:
+        tidyup categories add Invoices
+        tidyup categories add "Technical Books" --parent Books --keywords "programming,software,code"
+        tidyup categories add "Client Work" --patterns "acme_*,techcorp_*"
+        tidyup categories add "Random" --no-suggestions
+    """
     from rich.console import Console
 
     from .categories import get_category_manager
+    from .rules import CategoryRule
+    from .suggestions import suggest_rules
 
     console = Console()
     manager = get_category_manager()
 
+    # Check for suggestions if no rules explicitly provided
+    final_parent = parent
+    final_keywords: list[str] = []
+    final_patterns: list[str] = []
+
+    if keywords:
+        final_keywords = [k.strip() for k in keywords.split(",")]
+    if patterns:
+        final_patterns = [p.strip() for p in patterns.split(",")]
+
+    # Offer suggestions if no rules provided and not disabled
+    if not no_suggestions and not keywords and not patterns and not parent:
+        suggestion = suggest_rules(name)
+        if suggestion.has_suggestions:
+            console.print()
+            console.print("[bold]Suggestions based on category name:[/bold]")
+
+            if suggestion.parent:
+                console.print(f"  Parent: [yellow]{suggestion.parent}[/yellow]")
+            if suggestion.keywords:
+                kw_display = ", ".join(suggestion.keywords[:8])
+                if len(suggestion.keywords) > 8:
+                    kw_display += f" (+{len(suggestion.keywords) - 8} more)"
+                console.print(f"  Keywords: [cyan]{kw_display}[/cyan]")
+
+            console.print()
+
+            # Ask user if they want to accept suggestions
+            if click.confirm("Accept these suggestions?", default=True):
+                final_parent = suggestion.parent
+                final_keywords = suggestion.keywords
+            else:
+                console.print("[dim]Suggestions skipped. Adding category without rules.[/dim]")
+
+    # Build rules if any keywords or patterns
+    rules = None
+    if final_keywords or final_patterns:
+        rules = CategoryRule(keywords=final_keywords, patterns=final_patterns)
+
     try:
-        category = manager.add(name, position)
+        category = manager.add(name, position, parent=final_parent, rules=rules)
         manager.save()
         console.print(f"[green]Added category:[/green] {category.folder_name}")
+        if final_parent:
+            console.print(f"[dim]Parent: {final_parent}[/dim]")
+        if rules:
+            if rules.keywords:
+                console.print(f"[dim]Keywords: {', '.join(rules.keywords)}[/dim]")
+            if rules.patterns:
+                console.print(f"[dim]Patterns: {', '.join(rules.patterns)}[/dim]")
         console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
     except ValueError as e:
         console.print(f"[red]Error:[/red] {e}")
@@ -444,6 +543,142 @@ def categories_apply(path: Path, dry_run: bool) -> None:
 
     if not dry_run:
         console.print(f"\n[green]Renamed {len(changes)} folder(s)[/green]")
+
+
+@main.group(invoke_without_command=True)
+@click.pass_context
+def routing(ctx: click.Context) -> None:
+    """Manage category routing rules.
+
+    Routing allows remapping detector outputs to different categories.
+    For example, redirect all files detected as "Documents" by the
+    InvoiceDetector to an "Invoices" category instead.
+
+    \\b
+    Examples:
+        tidyup routing                           # List all routing rules
+        tidyup routing list                      # Same as above
+        tidyup routing set Documents PDF         # Global: Documents → PDF
+        tidyup routing set Documents Invoices --detector InvoiceDetector
+        tidyup routing remove Documents          # Remove global remap
+        tidyup routing remove Documents --detector InvoiceDetector
+    """
+    if ctx.invoked_subcommand is None:
+        # No subcommand given, show list
+        ctx.invoke(routing_list)
+
+
+@routing.command(name="list")
+def routing_list() -> None:
+    """List all configured routing rules."""
+    from rich.console import Console
+    from rich.table import Table
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    remaps = manager.routing.list_remaps()
+
+    if not remaps:
+        console.print("[dim]No routing rules configured.[/dim]")
+        console.print()
+        console.print("Add a rule with:")
+        console.print("  tidyup routing set <from> <to>")
+        console.print("  tidyup routing set <from> <to> --detector <name>")
+        console.print()
+        console.print("[dim]Example: Route invoices to a custom Invoices folder:[/dim]")
+        console.print("  tidyup categories add Invoices")
+        console.print("  tidyup routing set Documents Invoices --detector InvoiceDetector")
+        return
+
+    table = Table(title="Routing Rules")
+    table.add_column("Detector", style="cyan")
+    table.add_column("From", style="yellow")
+    table.add_column("To", style="green")
+
+    for remap in remaps:
+        detector_display = remap["detector"] if remap["detector"] != "*" else "[dim]*[/dim]"
+        table.add_row(detector_display, remap["from"], remap["to"])
+
+    console.print(table)
+    console.print()
+    console.print(f"[dim]Config: {manager.config_path}[/dim]")
+
+
+@routing.command(name="set")
+@click.argument("from_category")
+@click.argument("to_category")
+@click.option(
+    "--detector", "-d",
+    help="Only apply to this detector (e.g., InvoiceDetector)",
+)
+def routing_set(from_category: str, to_category: str, detector: str | None) -> None:
+    """Set a routing rule to remap categories.
+
+    \\b
+    Arguments:
+        FROM_CATEGORY  Original category from detector
+        TO_CATEGORY    Target category to route to
+    """
+    from rich.console import Console
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    # Validate that target category exists
+    if manager.get_by_name(to_category) is None:
+        console.print(f"[red]Error:[/red] Category '{to_category}' does not exist.")
+        console.print(f"[dim]Create it first with: tidyup categories add {to_category}[/dim]")
+        raise SystemExit(1)
+
+    # Set the remap
+    manager.routing.set_remap(from_category, to_category, detector)
+    manager.save()
+
+    if detector:
+        console.print(
+            f"[green]Routing set:[/green] {detector}: {from_category} → {to_category}"
+        )
+    else:
+        console.print(f"[green]Routing set:[/green] {from_category} → {to_category}")
+
+    console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
+
+
+@routing.command(name="remove")
+@click.argument("from_category")
+@click.option(
+    "--detector", "-d",
+    help="Only remove for this detector",
+)
+def routing_remove(from_category: str, detector: str | None) -> None:
+    """Remove a routing rule."""
+    from rich.console import Console
+
+    from .categories import get_category_manager
+
+    console = Console()
+    manager = get_category_manager()
+
+    removed = manager.routing.remove_remap(from_category, detector)
+
+    if removed:
+        manager.save()
+        if detector:
+            console.print(
+                f"[green]Removed routing:[/green] {detector}: {from_category}"
+            )
+        else:
+            console.print(f"[green]Removed routing:[/green] {from_category}")
+        console.print(f"[dim]Config saved to {manager.config_path}[/dim]")
+    else:
+        console.print(f"[yellow]No routing rule found for:[/yellow] {from_category}")
+        if detector:
+            console.print(f"[dim]Detector: {detector}[/dim]")
 
 
 if __name__ == "__main__":
